@@ -35,7 +35,7 @@ function M.new(env)
   function p:valid()
     if not self.owned then return false end
     local ok,value=pcall(env.get)
-    if not ok or value~=env.open then self.owned=false;env.log('pause_lost','external state change');return false end
+    if not ok or value~=env.open then self.owned=false;env.log('pause_lost','external state change: '..tostring(value));return false end
     return true
   end
   function p:hide_native()

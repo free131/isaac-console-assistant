@@ -2,17 +2,17 @@ local function render() frame=frame+1;draws={};callbacks[1]() end
 local function key(k) keys[k]=true;render();keys[k]=false;render() end
 local function blocked() return callbacks[2](nil,runtime_player,0,0)==false end
 -- The real main.lua must acquire native pause and hide its native input/render path.
-assert(nativePauseState==1 and Game():IsPaused() and callbacks[9]()==false)
-key(262);key(256);assert(nativePauseState==1 and blocked()) -- returning is not closing
+assert(nativePauseState==4 and Game():IsPaused() and callbacks[9]()==false)
+key(262);key(256);assert(nativePauseState==4 and blocked()) -- returning is not closing
 keys[257]=true;render();keys[297]=true;render();keys[297]=false;render()
-assert(nativePauseState==1 and callbacks[9]()==false and blocked()) -- held Enter guards resume
+assert(nativePauseState==4 and callbacks[9]()==false and blocked()) -- held Enter guards resume
 keys[257]=false;render();assert(nativePauseState==0 and callbacks[9]()==nil and not blocked())
 -- Missing extension refuses to open, instead of claiming a fake safe pause.
 local native=PauseMenu;PauseMenu=nil;key(297);assert(not blocked() and nativePauseState==0);PauseMenu=native
-key(297);assert(nativePauseState==1 and blocked())
+key(297);assert(nativePauseState==4 and blocked())
 -- Never release a pause acquired by a different menu.
 nativePauseState=2;render();render();assert(nativePauseState==2 and callbacks[9]()==nil)
-nativePauseState=0;render();key(297);assert(nativePauseState==1)
+nativePauseState=0;render();key(297);assert(nativePauseState==4)
 -- Room transition, new game and exit release the owned pause.
 callbacks[7]();render();assert(nativePauseState==0)
 key(297);callbacks[5](nil,false);render();assert(nativePauseState==0)

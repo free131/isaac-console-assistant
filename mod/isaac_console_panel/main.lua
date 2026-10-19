@@ -13,7 +13,10 @@ local game=Game()
 local pause=NativePause.new({
   available=function() return PauseMenu and type(PauseMenu.GetState)=='function' and type(PauseMenu.SetState)=='function' and ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER~=nil end,
   get=function() return PauseMenu.GetState() end,set=function(value) PauseMenu.SetState(value) end,
-  open=1,closed=0,paused=function() return game:IsPaused() end,
+  -- J835: state 1 still runs native PauseScreen::ProcessInput (raw Esc/Enter).
+  -- Private state 4 stays paused but bypasses native states 0/1/2 and popup 3.
+  -- Rendering is suppressed only while this panel owns that state.
+  open=4,closed=0,paused=function() return game:IsPaused() end,
   log=function(kind,message) Isaac.DebugString('[ICP-Pause] '..kind..' '..tostring(message)) end
 })
 local running=false
