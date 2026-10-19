@@ -109,7 +109,11 @@ local function render()
   -- Index 0 includes the keyboard's menu mappings (space, Q, E, arrows).
   -- Physical keyboard keys are read above; only poll menu actions for a gamepad.
   local function press(name,k,a,rep) return edge(name,key(k) or (a and pad_action(a,index)),rep) end
-  if press('back',Keyboard.KEY_ESCAPE,ButtonAction.ACTION_MENUBACK) then panel:back();return end
+  if press('back',Keyboard.KEY_ESCAPE,ButtonAction.ACTION_MENUBACK) then
+    panel:back()
+    if panel.open then view:draw(panel,Isaac.WorldToScreen(Input.GetMousePosition(true))) end
+    return
+  end
   if panel.editing then
     if press('up',Keyboard.KEY_UP,ButtonAction.ACTION_MENUUP,true) then panel:keyboard_move(0,-1) end
     if press('down',Keyboard.KEY_DOWN,ButtonAction.ACTION_MENUDOWN,true) then panel:keyboard_move(0,1) end
