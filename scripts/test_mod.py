@@ -1,10 +1,11 @@
 from pathlib import Path
 import json,sys,struct,xml.etree.ElementTree as ET,argparse,re
 ROOT=Path(__file__).resolve().parents[1]
-parser=argparse.ArgumentParser();parser.add_argument('--mod-path',type=Path,default=ROOT/'mod/isaac_console_panel');args=parser.parse_args();MOD=args.mod_path
+parser=argparse.ArgumentParser();parser.add_argument('--mod-path',type=Path,default=ROOT/'mod/isaac_console_panel');parser.add_argument('--lua-version',choices=['5.3','5.4'],default='5.4');args=parser.parse_args();MOD=args.mod_path
 sys.path.insert(0,str(ROOT/'.cache/python'))
 from PIL import Image
-from lupa.lua53 import LuaRuntime,lua_type
+from importlib import import_module
+lua_module=import_module('lupa.lua'+args.lua_version.replace('.',''));LuaRuntime=lua_module.LuaRuntime;lua_type=lua_module.lua_type
 def runtime():
     lua=LuaRuntime(unpack_returned_tuples=True)
     def include(name): return lua.execute((MOD/(name.replace('.','/')+'.lua')).read_text('utf-8'))
@@ -41,6 +42,8 @@ keyboard_lua=runtime();attach_json(keyboard_lua);keyboard_lua.execute(runtime_so
 keyboard_groups=keyboard_lua.execute((ROOT/'tests/mod_keyboard.lua').read_text('utf-8'))
 back_lua=runtime();attach_json(back_lua);back_lua.execute(runtime_source)
 back_groups=back_lua.execute((ROOT/'tests/mod_back_render.lua').read_text('utf-8'))
+pause_lua=runtime();attach_json(pause_lua);pause_lua.execute(runtime_source)
+pause_groups=pause_lua.execute((ROOT/'tests/mod_pause.lua').read_text('utf-8'))
 runtime_lua.execute('keys[292]=true;callbacks[1]();keys[292]=false;callbacks[1]()')
 runtime_lua.execute('keys[341]=true;keys[75]=true;callbacks[1]();keys[341]=false;keys[75]=false;callbacks[1]()')
 for c in 'FEIXING': runtime_lua.execute('keys[...]=true;callbacks[1]();keys[...]=false;callbacks[1]()',ord(c),ord(c))
@@ -67,12 +70,13 @@ text=''.join(p.read_text('utf-8') for p in MOD.rglob('*.lua'))
 assert {ord(c) for c in text if ord(c)>=32}<=ids|{127}
 assert list(Image.open(MOD/'resources/font/icp_panel.png').size)==manifest['atlas']
 ET.parse(MOD/'metadata.xml');ET.parse(MOD/'resources/gfx/icp/rect.anm2')
-report={'lua':'5.3','syntax_files':syntax,'module_test_groups':suite,'runtime_test_groups':runtime_groups,'font_glyphs':len(ids),'offline_passed':True,'game_verified':False,'note':'All game APIs mocked; no game process or console commands used.'}
+report={'lua':args.lua_version,'syntax_files':syntax,'module_test_groups':suite,'runtime_test_groups':runtime_groups,'font_glyphs':len(ids),'offline_passed':True,'game_verified':False,'note':'All game APIs mocked; no game process or console commands used.'}
 report['real_json_restart_and_corruption_recovery']=True
 report['enum_snapshot_exact_match']=True
 report['navigation_regression_groups']=navigation_groups
 report['keyboard_compatibility_groups']=keyboard_groups
 report['continuous_back_render_groups']=back_groups
+report['native_pause_groups']=pause_groups
 (ROOT/'test-artifacts').mkdir(exist_ok=True)
 (ROOT/'test-artifacts/mod-offline.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),'utf-8')
 print(json.dumps(report,ensure_ascii=False))

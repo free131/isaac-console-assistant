@@ -61,7 +61,7 @@ function M.new(categories,state,keyboard)
     end
     if p.category=='history' then self:button('delete','删此条',14,370,63,25);self:button('clear-history','清历史',82,370,64,25) end
     self:text(p.message,158,389,.67,{.94,.76,.38,1},585,2)
-    self:text('游戏不会暂停，角色仍可能受到伤害。',15,419,.78,{1,.48,.42,1},415)
+    self:text('战斗与计时已暂停；关闭并松开按键后恢复。',15,419,.70,{.55,.94,.72,1},415)
     self:text('F1切区  方向导航  Enter/A确认  Esc/B返回',421,420,.55,nil,325)
     if p.editing then
       self.buttons={};self.focus_id='vk:'..p.keyboardIndex
@@ -76,6 +76,10 @@ function M.new(categories,state,keyboard)
       self:box(x-1,y-1,3,13,{0,0,0});self:box(x-1,y-1,11,3,{0,0,0})
       self:box(x,y,1,11,{1,1,1});self:box(x,y,9,1,{1,1,1})
     end
+  end
+  function r:notice(message)
+    if not font:IsLoaded() then Isaac.RenderText('ICP pause support missing. See README.',12,42,1,.5,.4,1);return end
+    self.scale=1;self.x=0;self.y=0;self:text(message,12,42,.8,{1,.5,.4,1},Isaac.GetScreenWidth()-24,3)
   end
   function r:hit(x,y)
     x=(x-self.x)/self.scale;y=(y-self.y)/self.scale

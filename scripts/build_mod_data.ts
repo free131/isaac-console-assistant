@@ -33,7 +33,7 @@ for(const [id,name,method,getter,min,max,value,...aliases] of resources){
   const half=['hearts','soul-hearts','black-hearts','max-hearts'].includes(id);
   add({key:'resource:'+id,name:'增减'+name,english:method,category:'resources',action:'resource',method,getter,minimum:min,maximum:max,default:value,description:half?'数量单位为半颗／半个，2 表示完整一颗／一个。受角色机制和容量影响。':'按数量增减'+name+'，受角色机制和容量影响。',unit:half?'半心单位':'数量'},[...aliases]);
 }
-for(const [id,name,aliases] of [['flight','飞行开关',['feixing','fei','fly']],['invincible','无敌开关',['wudi','invincible']]] as const)add({key:'ability:'+id,name,english:id,category:'abilities',action:'ability',ability:id,minimum:1,maximum:1,default:1,description:id==='flight'?'当前局的飞行开关，不添加道具。关闭后恢复道具和角色自身的飞行判定。':'当前局的玩家受伤拦截开关。只影响首位玩家，不会暂停游戏。'},[...aliases]);
+for(const [id,name,aliases] of [['flight','飞行开关',['feixing','fei','fly']],['invincible','无敌开关',['wudi','invincible']]] as const)add({key:'ability:'+id,name,english:id,category:'abilities',action:'ability',ability:id,minimum:1,maximum:1,default:1,description:id==='flight'?'当前局的飞行开关，不添加道具。关闭后恢复道具和角色自身的飞行判定。':'当前局的玩家受伤拦截开关。只影响首位玩家。'},[...aliases]);
 for(const [id,name,description,danger,aliases] of [
  ['rewind','回溯房间','类似发光沙漏；回退位置由游戏的房间历史决定。',false,['houshui','houhui','huifangjian','rewind']],
  ['restart-floor','重置当前楼层','重置整个楼层的进度，保留当前楼层和分支。不是回溯房间。',true,['chongkaibenguan','chongkaibenceng','benguan','benceng','chongkaibengceng']],

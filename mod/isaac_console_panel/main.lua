@@ -4,11 +4,18 @@ local State=include('icp/state')
 local Actions=include('icp/actions')
 local Panel=include('icp/panel')
 local Renderer=include('icp/render')
+local NativePause=include('icp/pause')
 local json=require('json')
 local catalog=Search.prepare(include('icp/catalog'))
 local raw=mod:HasData() and mod:LoadData() or ''
 local state,warning=State.load(raw,json.decode,catalog.by_key)
 local game=Game()
+local pause=NativePause.new({
+  available=function() return PauseMenu and type(PauseMenu.GetState)=='function' and type(PauseMenu.SetState)=='function' and ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER~=nil end,
+  get=function() return PauseMenu.GetState() end,set=function(value) PauseMenu.SetState(value) end,
+  open=1,closed=0,paused=function() return game:IsPaused() end,
+  log=function(kind,message) Isaac.DebugString('[ICP-Pause] '..kind..' '..tostring(message)) end
+})
 local running=false
 local reading=false
 local held={}
@@ -25,7 +32,7 @@ panel=Panel.new(Search,catalog,state,actions,function() if not save() then panel
 -- Forward reference is intentionally assigned after construction for save errors.
 local view=Renderer.new(Panel.categories,state,Panel.keyboard)
 panel.message=warning or '键盘用英文输入法；F1 切区，方向导航，Enter 确认。'
-local function menus_open() return game:IsPaused() or (ModConfigMenu and ModConfigMenu.IsVisible==true) or (gt and gt.mapHeld==true) or (DeadSeaScrollsMenu and DeadSeaScrollsMenu.Opened==true) end
+local function menus_open() return (game:IsPaused() and not pause.owned) or (ModConfigMenu and ModConfigMenu.IsVisible==true) or (gt and gt.mapHeld==true) or (DeadSeaScrollsMenu and DeadSeaScrollsMenu.Opened==true) end
 local function raw_key(code)
   -- EID's crafting-search wrapper exposes force=true for other input owners.
   -- Do not replace its global functions or change its search settings.
@@ -94,18 +101,23 @@ local function edit_query()
 end
 local function render()
   panel.tick=panel.tick+1
+  if pause.owned and not pause:valid() and panel.open then panel:close() end
   local p=player();local index=p and p.ControllerIndex or 0
   local toggle=edge('toggle',key(Keyboard[state.hotkey]))
   if menus_open() or not running then
     if panel.open then panel:close() end
-    if panel.guard and release_ready(index) then panel.guard=false;held={} end
+    if panel.guard and release_ready(index) then panel.guard=false;held={};pause:finish() end
     return
   end
   if toggle then
-    if panel.open then panel:close() elseif not panel.guard then panel.open=true;panel.guard=true;panel.focus='results';panel.control=1;panel:refresh(game:IsGreedMode()) end
+    if panel.open then panel:close() elseif not panel.guard then
+      local ok,message=pause:begin()
+      if ok then panel.open=true;panel.guard=true;panel.focus='results';panel.control=1;panel:refresh(game:IsGreedMode())
+      else panel.message=message;panel.noticeUntil=panel.tick+240 end
+    end
   end
-  if panel.guard then if release_ready(index) then panel.guard=false;held={} end;return end
-  if not panel.open then return end
+  if panel.guard then if release_ready(index) then panel.guard=false;held={};if not panel.open then pause:finish() end end;return end
+  if not panel.open then if panel.noticeUntil and panel.noticeUntil>panel.tick then view:notice(panel.message) end;return end
   -- Index 0 includes the keyboard's menu mappings (space, Q, E, arrows).
   -- Physical keyboard keys are read above; only poll menu actions for a gamepad.
   local function press(name,k,a,rep) return edge(name,key(k) or (a and pad_action(a,index)),rep) end
@@ -145,8 +157,11 @@ local function render()
 end
 mod:AddCallback(ModCallbacks.MC_POST_RENDER,function()
   local ok,err=pcall(render)
-  if not ok then reading=false;panel:close();Isaac.DebugString('ICP panel error: '..tostring(err)) end
+  if not ok then reading=false;panel:close();pause:finish();Isaac.DebugString('ICP panel error: '..tostring(err)) end
 end)
+if ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER then
+  mod:AddCallback(ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER,function() return pause:hide_native() end)
+end
 mod:AddCallback(ModCallbacks.MC_INPUT_ACTION,function(_,entity,hook,button)
   if not reading and (panel.open or panel.guard) and (not entity or entity:ToPlayer()) then
     if hook==InputHook.GET_ACTION_VALUE then return 0 else return false end
@@ -155,7 +170,7 @@ end)
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,function(_,p,flag) actions:on_cache(p,flag) end)
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG,function(_,entity) return actions:on_damage(entity) end,EntityType.ENTITY_PLAYER)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,function(_,continued)
-  running=true;State.begin_run(state,continued,game:GetSeeds():GetStartSeed());actions:refresh_flight();panel:close();save()
+  pause:finish();running=true;State.begin_run(state,continued,game:GetSeeds():GetStartSeed());actions:refresh_flight();panel:close();save()
 end)
-mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT,function() panel:close();save();running=false end)
-mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,function() if panel.open then panel:close() end end)
+mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT,function() panel:close();pause:finish();save();running=false end)
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,function() if panel.open then panel:close() end;pause:finish() end)

@@ -1,0 +1,314 @@
+{
+  "date": "2026-10-19",
+  "source": "user-run probe SaveData",
+  "game": "Repentance v1.7.9b.J835",
+  "extension_integration_verified": false,
+  "probe_data": {
+    "status": "request_finished_result_unverified",
+    "updates": 183,
+    "version": 1,
+    "marks": [
+      {
+        "label": "game_started",
+        "ms": 42229900,
+        "game_frame": 5004,
+        "timer": 5004,
+        "paused": false,
+        "renders": 0,
+        "updates": 0
+      },
+      {
+        "label": "F6_before_hook_request",
+        "delta": {
+          "ms": 7428,
+          "timer": 41,
+          "game_frame": 41,
+          "renders": 435,
+          "updates": 41
+        },
+        "ms": 42237328,
+        "game_frame": 5045,
+        "timer": 5045,
+        "paused": false,
+        "renders": 435,
+        "updates": 41
+      },
+      {
+        "label": "F6_request_finished",
+        "delta": {
+          "ms": 1016,
+          "timer": 0,
+          "game_frame": 0,
+          "renders": 61,
+          "updates": 0
+        },
+        "ms": 42238344,
+        "game_frame": 5045,
+        "timer": 5045,
+        "paused": true,
+        "renders": 496,
+        "updates": 41
+      },
+      {
+        "label": "F6_before_hook_request",
+        "delta": {
+          "ms": 3418,
+          "timer": 70,
+          "game_frame": 70,
+          "renders": 205,
+          "updates": 70
+        },
+        "ms": 42241762,
+        "game_frame": 5115,
+        "timer": 5115,
+        "paused": false,
+        "renders": 701,
+        "updates": 111
+      },
+      {
+        "label": "F6_request_finished",
+        "delta": {
+          "ms": 1000,
+          "timer": 0,
+          "game_frame": 0,
+          "renders": 60,
+          "updates": 0
+        },
+        "ms": 42242762,
+        "game_frame": 5115,
+        "timer": 5115,
+        "paused": true,
+        "renders": 761,
+        "updates": 111
+      },
+      {
+        "label": "console_A",
+        "delta": {
+          "ms": 1082,
+          "timer": 0,
+          "game_frame": 0,
+          "renders": 64,
+          "updates": 0
+        },
+        "ms": 42243844,
+        "game_frame": 5115,
+        "timer": 5115,
+        "paused": true,
+        "renders": 825,
+        "updates": 111
+      },
+      {
+        "label": "console_B",
+        "delta": {
+          "ms": 7495,
+          "timer": 0,
+          "game_frame": 0,
+          "renders": 429,
+          "updates": 0
+        },
+        "ms": 42251339,
+        "game_frame": 5115,
+        "timer": 5115,
+        "paused": true,
+        "renders": 1254,
+        "updates": 111
+      },
+      {
+        "label": "F7_render_key_received",
+        "delta": {
+          "ms": 9845,
+          "timer": 0,
+          "game_frame": 0,
+          "renders": 584,
+          "updates": 0
+        },
+        "ms": 42261184,
+        "game_frame": 5115,
+        "timer": 5115,
+        "paused": true,
+        "renders": 1838,
+        "updates": 111
+      },
+      {
+        "label": "F7_render_key_received",
+        "delta": {
+          "ms": 2516,
+          "timer": 25,
+          "game_frame": 25,
+          "renders": 151,
+          "updates": 25
+        },
+        "ms": 42263700,
+        "game_frame": 5140,
+        "timer": 5140,
+        "paused": false,
+        "renders": 1989,
+        "updates": 136
+      },
+      {
+        "label": "F6_before_hook_request",
+        "delta": {
+          "ms": 1567,
+          "timer": 47,
+          "game_frame": 47,
+          "renders": 94,
+          "updates": 47
+        },
+        "ms": 42265267,
+        "game_frame": 5187,
+        "timer": 5187,
+        "paused": false,
+        "renders": 2083,
+        "updates": 183
+      },
+      {
+        "label": "F6_request_finished",
+        "delta": {
+          "ms": 1002,
+          "timer": 0,
+          "game_frame": 0,
+          "renders": 56,
+          "updates": 0
+        },
+        "ms": 42266269,
+        "game_frame": 5187,
+        "timer": 5187,
+        "paused": true,
+        "renders": 2139,
+        "updates": 183
+      },
+      {
+        "label": "game_exit",
+        "delta": {
+          "ms": 6197,
+          "timer": 0,
+          "game_frame": 0,
+          "renders": 368,
+          "updates": 0
+        },
+        "ms": 42272466,
+        "game_frame": 5187,
+        "timer": 5187,
+        "paused": true,
+        "renders": 2507,
+        "updates": 183
+      }
+    ],
+    "console_hook_samples": [
+      {
+        "physical_grave": false,
+        "ms": 42230026,
+        "hook": 1,
+        "renders": 1,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230042,
+        "hook": 1,
+        "renders": 2,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230059,
+        "hook": 1,
+        "renders": 3,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230076,
+        "hook": 1,
+        "renders": 4,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230092,
+        "hook": 1,
+        "renders": 5,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230109,
+        "hook": 1,
+        "renders": 6,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230126,
+        "hook": 1,
+        "renders": 7,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230142,
+        "hook": 1,
+        "renders": 8,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230159,
+        "hook": 1,
+        "renders": 9,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230175,
+        "hook": 1,
+        "renders": 10,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230192,
+        "hook": 1,
+        "renders": 11,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230209,
+        "hook": 1,
+        "renders": 12,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230225,
+        "hook": 1,
+        "renders": 13,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230242,
+        "hook": 1,
+        "renders": 14,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230259,
+        "hook": 1,
+        "renders": 15,
+        "updates": 0
+      },
+      {
+        "physical_grave": false,
+        "ms": 42230276,
+        "hook": 1,
+        "renders": 16,
+        "updates": 0
+      }
+    ],
+    "renders": 2507,
+    "game_verified": false
+  }
+}

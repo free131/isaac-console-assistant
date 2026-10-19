@@ -2,7 +2,7 @@
 
 适配基准：本机 Repentance v1.7.9b.J835。独立 Lua Mod，不需要 EID、桥接程序或联网。桌面软件继续保留。
 
-**面板不会暂停整个游戏，角色仍可能受到伤害。请先在安全房间试用。** 打开时会拦截角色输入，怪物、弹幕与房间计时仍继续运行。用户已反馈指令执行有效；本次键盘 / 手柄导航和 Esc 返回修正经过离线回归，仍待游戏内确认。
+本版依赖匹配 J835 的 **REPENTOGON 1.0.12e**，以原生暂停菜单状态暂停战斗与计时。关闭面板并松开按键后恢复；Esc / B 只返回，不恢复战斗。组件缺失时会提示并拒绝打开。用户已确认旧版指令执行有效；本次暂停集成仅完成离线检查，实际效果待重新进入游戏验收。组件来源和回退见 `暂停组件说明.md`。
 
 ## 安装与移除
 
@@ -54,7 +54,7 @@
 
 ## 源码与构建
 
-源码位于仓库 `mod/isaac_console_panel`。`main.lua` 注册回调；`icp/search.lua` 检索；`panel.lua` 管理选择和确认；`render.lua` 渲染；`actions.lua` 执行白名单动作；`state.lua` 清理及保存状态；`catalog.lua` 自动生成。
+源码位于仓库 `mod/isaac_console_panel`。`main.lua` 注册回调；`icp/search.lua` 检索；`panel.lua` 管理选择和确认；`render.lua` 渲染；`actions.lua` 执行白名单动作；`state.lua` 清理及保存状态；`catalog.lua` 自动生成；`pause.lua` 管理原生暂停的取得与释放。
 
 在仓库根目录执行（Git Bash，Python 3.10+、Node.js 22.12+）：
 
@@ -64,4 +64,4 @@ python -m pip install --target .cache/python lupa==2.8 Pillow fonttools
 npm run mod:package
 ```
 
-已有生成字体随源码提供；重新生成字体首次需联网下载 Noto Sans SC，之后使用缓存。数据生成读取现有桌面目录，不执行游戏脚本。输出 `release/以撒游戏内指令面板-0.1.0.zip`。离线测试使用 Lua 5.3 模拟 API，不向游戏发送任何命令。字体、数据来源与许可见 `来源与许可.md`、`licenses/` 和 `catalog-sources.json`。
+已有生成字体随源码提供；重新生成字体首次需联网下载 Noto Sans SC，之后使用缓存。数据生成读取现有桌面目录，不执行游戏脚本。输出 `release/以撒游戏内指令面板-0.1.0.zip`。离线测试分别使用 Lua 5.3 和 5.4 模拟 API，不向游戏发送任何命令。字体、数据来源与许可见 `来源与许可.md`、`licenses/` 和 `catalog-sources.json`。
