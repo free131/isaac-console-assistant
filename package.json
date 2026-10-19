@@ -6,6 +6,10 @@
   "author": "Local Tools",
   "main": "electron/main.cjs",
   "scripts": {
+    "mod:data": "tsx scripts/build_mod_data.ts",
+    "mod:assets": "python scripts/build_mod_assets.py",
+    "mod:test": "python scripts/test_mod.py",
+    "mod:package": "npm run mod:data && npm run mod:assets && npm run mod:test && python scripts/package_mod.py",
     "dev": "vite --host 127.0.0.1",
     "start": "electron .",
     "build": "tsc --noEmit && vite build",

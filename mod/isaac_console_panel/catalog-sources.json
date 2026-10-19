@@ -1,0 +1,33 @@
+{
+  "version": "Repentance v1.7.9b.J835",
+  "provenance": {
+    "enumsSha256": "dce1892f51e4e645d66ac8ffb31d217e8c36a32457c1005dd128978141103dc5",
+    "cheatSheetRevision": "7d59952d4e5718ac80ebf9a60b4f7c5611557952",
+    "sources": [
+      {
+        "id": "local-enums",
+        "label": "本机 resources/scripts/enums.lua"
+      },
+      {
+        "id": "cheat-sheet+local-enums",
+        "label": "isaac-cheat-sheet（MIT）＋本机枚举",
+        "url": "https://github.com/roiiiu/isaac-cheat-sheet/tree/7d59952d4e5718ac80ebf9a60b4f7c5611557952"
+      },
+      {
+        "id": "local-names+local-enums",
+        "label": "本机 EID 名称＋本机枚举"
+      }
+    ]
+  },
+  "counts": {
+    "collectibles": 721,
+    "trinkets": 188,
+    "cards": 97,
+    "pills": 50,
+    "resources": 11,
+    "abilities": 2,
+    "flow": 3,
+    "stages": 50
+  },
+  "excluded": "OBSOLETE / NULL / FLAG / MASK；饰品 47 已过时，保留空号不补齐"
+}

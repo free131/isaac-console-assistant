@@ -1,0 +1,8 @@
+<metadata>
+  <name>以撒游戏内指令面板</name>
+  <directory>isaac_console_panel</directory>
+  <id>isaac_console_panel</id>
+  <description>Repentance 1.7.9b · 中文／拼音指令面板 v0.1.0。F8 打开，游戏不会暂停。仅单人模式执行。</description>
+  <version>0.1.0</version>
+  <visibility>Private</visibility>
+</metadata>

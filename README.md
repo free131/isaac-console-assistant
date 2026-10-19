@@ -1,5 +1,7 @@
 # 以撒控制台助手
 
+现新增独立的[游戏内指令面板 v0.1 试用版](mod/isaac_console_panel/README.md)，源码在 `mod/isaac_console_panel/`，构建入口 `npm run mod:package`。桌面版保持原有功能。Mod 已完成离线验证，游戏内验收请按[测试清单](mod/isaac_console_panel/游戏内测试清单.md)逐项确认；面板不会暂停游戏。
+
 适配 **The Binding of Isaac: Repentance v1.7.9b.J835** 的 Windows 离线命令速查工具。v1.1.0 默认开启中文模糊搜索，也支持英文、拼音、别名与 ID；填写参数后复制命令，并提供收藏、最近复制和窗口置顶。
 
 ## 打开软件
