@@ -37,7 +37,7 @@ function M.new(categories,state,keyboard)
     self:text('以撒指令面板',15,12,1.1);self:text('v0.1 · Repentance 1.7.9b',430,18,.7)
     self:button('hotkey',state.hotkey:gsub('KEY_','')..' 改键',590,10,105,30)
     self:button('close','关闭',702,10,43,30)
-    self:button('search',p.query=='' and '搜索：直接输入拼音 / ID，或确认打开手柄输入' or p.query..'_',14,50,655,31)
+    self:button('search',p.query=='' and '搜索（英文输入法）：直接输入拼音 / ID，确认可用手柄输入' or p.query..'_',14,50,655,31)
     self:button('clear','清空',680,50,65,31)
     for i,c in ipairs(categories) do self:button('cat:'..c[1],c[2],14,90+(i-1)*25,132,23,p.category==c[1]) end
     self:text('结果 '..#p.hits..' 条',160,91,.7)

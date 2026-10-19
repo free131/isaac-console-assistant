@@ -12,6 +12,7 @@ local game=Game()
 local running=false
 local reading=false
 local held={}
+local keyboardErrorReported=false
 local function player() if running and game:GetNumPlayers()>0 then return Isaac.GetPlayer(0) end end
 local function save()
   local ok,err=pcall(function() mod:SaveData(json.encode(state)) end)
@@ -23,9 +24,25 @@ local panel
 panel=Panel.new(Search,catalog,state,actions,function() if not save() then panel.message='操作已执行，但记录保存失败。' end end,function(req) State.record(state,req,game:GetFrameCount()) end)
 -- Forward reference is intentionally assigned after construction for save errors.
 local view=Renderer.new(Panel.categories,state,Panel.keyboard)
-panel.message=warning or 'F1 / 手柄菜单切换键切换区域；方向导航，确认操作。'
+panel.message=warning or '键盘用英文输入法；F1 切区，方向导航，Enter 确认。'
 local function menus_open() return game:IsPaused() or (ModConfigMenu and ModConfigMenu.IsVisible==true) or (gt and gt.mapHeld==true) or (DeadSeaScrollsMenu and DeadSeaScrollsMenu.Opened==true) end
-local function key(code) return code and Input.IsButtonPressed(code,0) or false end
+local function raw_key(code)
+  -- EID's crafting-search wrapper exposes force=true for other input owners.
+  -- Do not replace its global functions or change its search settings.
+  if EID and type(EID.BoCSHookInputIsButtonPressed)=='function' then return Input.IsButtonPressed(code,0,true) end
+  return Input.IsButtonPressed(code,0)
+end
+local function key(code)
+  if type(code)~='number' then return false end
+  local previous=reading;reading=true
+  local ok,down=pcall(function()
+    -- Repentance can alias controller buttons to keyboard codes modulo 32.
+    return raw_key(code) and not raw_key(code%32)
+  end)
+  reading=previous
+  if not ok and not keyboardErrorReported then keyboardErrorReported=true;Isaac.DebugString('ICP keyboard input error: '..tostring(down)) end
+  return ok and down or false
+end
 local function edge(id,down,repeatable)
   local n=held[id] or 0;held[id]=down and n+1 or 0
   return down and (n==0 or (repeatable and n>20 and n%5==0))
@@ -34,9 +51,14 @@ local function action(code,index)
   reading=true;local ok,v=pcall(Input.IsActionPressed,code,index);reading=false
   return ok and v or false
 end
+local function pad_action(code,index)
+  if index>0 then return action(code,index) end
+  for controller=1,4 do if action(code,controller) then return true end end
+  return false
+end
 local function release_ready(index)
-  for code=32,348 do if key(code) then return false end end
-  for code=0,26 do if action(code,index) then return false end end
+  for _,code in pairs(Keyboard) do if type(code)=='number' and code>=32 and key(code) then return false end end
+  for code=0,26 do if pad_action(code,index) then return false end end
   return not Input.IsMouseBtnPressed(0)
 end
 local function click(id)
@@ -84,7 +106,9 @@ local function render()
   end
   if panel.guard then if release_ready(index) then panel.guard=false;held={} end;return end
   if not panel.open then return end
-  local function press(name,k,a,rep) return edge(name,key(k) or (a and action(a,index)),rep) end
+  -- Index 0 includes the keyboard's menu mappings (space, Q, E, arrows).
+  -- Physical keyboard keys are read above; only poll menu actions for a gamepad.
+  local function press(name,k,a,rep) return edge(name,key(k) or (a and pad_action(a,index)),rep) end
   if press('back',Keyboard.KEY_ESCAPE,ButtonAction.ACTION_MENUBACK) then panel:back();return end
   if panel.editing then
     if press('up',Keyboard.KEY_UP,ButtonAction.ACTION_MENUUP,true) then panel:keyboard_move(0,-1) end
@@ -120,7 +144,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER,function()
   if not ok then reading=false;panel:close();Isaac.DebugString('ICP panel error: '..tostring(err)) end
 end)
 mod:AddCallback(ModCallbacks.MC_INPUT_ACTION,function(_,entity,hook,button)
-  if not reading and (panel.open or panel.guard) and (not entity or entity:ToPlayer()) and button~=ButtonAction.ACTION_FULLSCREEN and button~=ButtonAction.ACTION_MUTE then
+  if not reading and (panel.open or panel.guard) and (not entity or entity:ToPlayer()) then
     if hook==InputHook.GET_ACTION_VALUE then return 0 else return false end
   end
 end)

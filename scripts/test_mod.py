@@ -37,6 +37,8 @@ runtime_source=(ROOT/'tests/mod_runtime.lua').read_text('utf-8')
 runtime_lua=runtime();attach_json(runtime_lua);runtime_groups=runtime_lua.execute(runtime_source)
 navigation_lua=runtime();attach_json(navigation_lua);navigation_lua.execute(runtime_source)
 navigation_groups=navigation_lua.execute((ROOT/'tests/mod_navigation.lua').read_text('utf-8'))
+keyboard_lua=runtime();attach_json(keyboard_lua);keyboard_lua.execute(runtime_source)
+keyboard_groups=keyboard_lua.execute((ROOT/'tests/mod_keyboard.lua').read_text('utf-8'))
 runtime_lua.execute('keys[292]=true;callbacks[1]();keys[292]=false;callbacks[1]()')
 runtime_lua.execute('keys[341]=true;keys[75]=true;callbacks[1]();keys[341]=false;keys[75]=false;callbacks[1]()')
 for c in 'FEIXING': runtime_lua.execute('keys[...]=true;callbacks[1]();keys[...]=false;callbacks[1]()',ord(c),ord(c))
@@ -67,6 +69,7 @@ report={'lua':'5.3','syntax_files':syntax,'module_test_groups':suite,'runtime_te
 report['real_json_restart_and_corruption_recovery']=True
 report['enum_snapshot_exact_match']=True
 report['navigation_regression_groups']=navigation_groups
+report['keyboard_compatibility_groups']=keyboard_groups
 (ROOT/'test-artifacts').mkdir(exist_ok=True)
 (ROOT/'test-artifacts/mod-offline.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),'utf-8')
 print(json.dumps(report,ensure_ascii=False))
