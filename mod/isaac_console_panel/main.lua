@@ -22,8 +22,8 @@ local actions=Actions.new({player=player,game=function() return game end,execute
 local panel
 panel=Panel.new(Search,catalog,state,actions,function() if not save() then panel.message='操作已执行，但记录保存失败。' end end,function(req) State.record(state,req,game:GetFrameCount()) end)
 -- Forward reference is intentionally assigned after construction for save errors.
-local view=Renderer.new(Panel.categories,state)
-panel.message=warning or 'PageUp / PageDown 切换分类；点击右上改键。'
+local view=Renderer.new(Panel.categories,state,Panel.keyboard)
+panel.message=warning or 'F1 / 手柄菜单切换键切换区域；方向导航，确认操作。'
 local function menus_open() return game:IsPaused() or (ModConfigMenu and ModConfigMenu.IsVisible==true) or (gt and gt.mapHeld==true) or (DeadSeaScrollsMenu and DeadSeaScrollsMenu.Opened==true) end
 local function key(code) return code and Input.IsButtonPressed(code,0) or false end
 local function edge(id,down,repeatable)
@@ -41,20 +41,34 @@ local function release_ready(index)
 end
 local function click(id)
   if not id then return end
-  if id:sub(1,4)=='cat:' then panel.category=id:sub(5);panel:refresh(game:IsGreedMode())
-  elseif id:sub(1,4)=='row:' then panel:select(tonumber(id:sub(5)))
+  if id:sub(1,4)=='cat:' then panel.focus='categories';panel.category=id:sub(5);panel:refresh(game:IsGreedMode())
+  elseif id:sub(1,4)=='row:' then panel.focus='results';panel:select(tonumber(id:sub(5)))
   elseif id=='clear' then panel:set_query('')
+  elseif id=='search' then panel:open_search()
+  elseif id:sub(1,3)=='vk:' then panel.keyboardIndex=tonumber(id:sub(4));panel:keyboard_confirm()
   elseif id=='prev' then panel:select(panel.selected-8)
   elseif id=='next' then panel:select(panel.selected+8)
-  elseif id=='plus' then panel:adjust(1)
+  elseif id=='plus' or id=='quantity' then panel:adjust(1)
   elseif id=='minus' then panel:adjust(-1)
   elseif id=='operation' then panel:toggle_operation()
   elseif id=='favorite' then panel:favorite()
   elseif id=='execute' then panel:execute()
   elseif id=='delete' then panel:history_delete()
   elseif id=='clear-history' then
-    if panel.clearConfirm and panel.clearConfirm>panel.tick then state.history={};panel.clearConfirm=nil;save();panel:refresh(game:IsGreedMode()) else panel.clearConfirm=panel.tick+240;panel.message='再次点击“清历史”确认清空。' end
-  elseif id=='hotkey' then State.cycle_hotkey(state);save();panel.message='打开 / 关闭热键已设为 '..state.hotkey:gsub('KEY_','') end
+    if panel.clearConfirm and panel.clearConfirm>panel.tick then state.history={};panel.clearConfirm=nil;save();panel:refresh(game:IsGreedMode()) else panel.clearConfirm=panel.tick+240;panel.message='再次确认“清历史”以清空记录。' end
+  elseif id=='hotkey' then State.cycle_hotkey(state);save();panel.message='打开 / 关闭热键已设为 '..state.hotkey:gsub('KEY_','')
+  elseif id=='close' then panel:close() end
+end
+local function edit_query()
+  if edge('erase',key(Keyboard.KEY_BACKSPACE),true) then panel:set_query(panel.query:sub(1,-2)) end
+  local ctrl=key(Keyboard.KEY_LEFT_CONTROL) or key(Keyboard.KEY_RIGHT_CONTROL)
+  local clearQuery=edge('clear-query',key(Keyboard.KEY_K))
+  if ctrl and clearQuery then panel:set_query('') end
+  if not ctrl then
+    for code=48,90 do if (code<=57 or code>=65) and edge('text'..code,key(code),true) then panel:set_query(panel.query..string.char(code):lower()) end end
+    if edge('text-minus',key(Keyboard.KEY_MINUS),true) then panel:set_query(panel.query..'-') end
+    if edge('text-space',key(Keyboard.KEY_SPACE),true) then panel:set_query(panel.query..' ') end
+  end
 end
 local function render()
   panel.tick=panel.tick+1
@@ -66,34 +80,40 @@ local function render()
     return
   end
   if toggle then
-    if panel.open then panel:close() elseif not panel.guard then panel.open=true;panel.guard=true;panel:refresh(game:IsGreedMode()) end
+    if panel.open then panel:close() elseif not panel.guard then panel.open=true;panel.guard=true;panel.focus='results';panel.control=1;panel:refresh(game:IsGreedMode()) end
   end
   if panel.guard then if release_ready(index) then panel.guard=false;held={} end;return end
   if not panel.open then return end
   local function press(name,k,a,rep) return edge(name,key(k) or (a and action(a,index)),rep) end
   if press('back',Keyboard.KEY_ESCAPE,ButtonAction.ACTION_MENUBACK) then panel:back();return end
-  if press('up',Keyboard.KEY_UP,ButtonAction.ACTION_MENUUP,true) then panel:select(panel.selected-1) end
-  if press('down',Keyboard.KEY_DOWN,ButtonAction.ACTION_MENUDOWN,true) then panel:select(panel.selected+1) end
-  if press('left',Keyboard.KEY_LEFT,ButtonAction.ACTION_MENULEFT,true) then panel:adjust(-1) end
-  if press('right',Keyboard.KEY_RIGHT,ButtonAction.ACTION_MENURIGHT,true) then panel:adjust(1) end
-  if press('category',Keyboard.KEY_PAGE_DOWN,ButtonAction.ACTION_MENURT) then panel:category_move(1) end
-  if press('category-back',Keyboard.KEY_PAGE_UP,ButtonAction.ACTION_MENULT) then panel:category_move(-1) end
+  if panel.editing then
+    if press('up',Keyboard.KEY_UP,ButtonAction.ACTION_MENUUP,true) then panel:keyboard_move(0,-1) end
+    if press('down',Keyboard.KEY_DOWN,ButtonAction.ACTION_MENUDOWN,true) then panel:keyboard_move(0,1) end
+    if press('left',Keyboard.KEY_LEFT,ButtonAction.ACTION_MENULEFT,true) then panel:keyboard_move(-1,0) end
+    if press('right',Keyboard.KEY_RIGHT,ButtonAction.ACTION_MENURIGHT,true) then panel:keyboard_move(1,0) end
+    edit_query()
+    if press('confirm',Keyboard.KEY_ENTER,ButtonAction.ACTION_MENUCONFIRM) then panel:keyboard_confirm() end
+    local pos=Isaac.WorldToScreen(Input.GetMousePosition(true));view:draw(panel,pos)
+    if edge('mouse',Input.IsMouseBtnPressed(0)) then click(view:hit(pos.X,pos.Y)) end
+    return
+  end
+  if press('up',Keyboard.KEY_UP,ButtonAction.ACTION_MENUUP,true) then panel:navigate(0,-1) end
+  if press('down',Keyboard.KEY_DOWN,ButtonAction.ACTION_MENUDOWN,true) then panel:navigate(0,1) end
+  if press('left',Keyboard.KEY_LEFT,ButtonAction.ACTION_MENULEFT,true) then panel:navigate(-1,0) end
+  if press('right',Keyboard.KEY_RIGHT,ButtonAction.ACTION_MENURIGHT,true) then panel:navigate(1,0) end
+  if press('focus',Keyboard.KEY_F1,ButtonAction.ACTION_MENURT) then panel:focus_move(1) end
+  if press('focus-back',nil,ButtonAction.ACTION_MENULT) then panel:focus_move(-1) end
+  if press('category',Keyboard.KEY_PAGE_DOWN,nil) then panel:category_move(1) end
+  if press('category-back',Keyboard.KEY_PAGE_UP,nil) then panel:category_move(-1) end
   if press('mode',Keyboard.KEY_F2,nil) then panel:toggle_operation() end
   if press('favorite',Keyboard.KEY_F3,nil) then panel:favorite() end
   if press('delete',Keyboard.KEY_DELETE,nil) then panel:history_delete() end
-  if press('erase',Keyboard.KEY_BACKSPACE,nil,true) then panel:set_query(panel.query:sub(1,-2)) end
-  local ctrl=key(Keyboard.KEY_LEFT_CONTROL) or key(Keyboard.KEY_RIGHT_CONTROL)
-  local clearQuery=edge('clear-query',key(Keyboard.KEY_K))
-  if ctrl and clearQuery then panel:set_query('') end
-  if not ctrl then
-    for code=48,90 do if (code<=57 or code>=65) and edge('text'..code,key(code),true) then panel:set_query(panel.query..string.char(code):lower()) end end
-    if edge('text-minus',key(Keyboard.KEY_MINUS),true) then panel:set_query(panel.query..'-') end
-    if edge('text-space',key(Keyboard.KEY_SPACE),true) then panel:set_query(panel.query..' ') end
-  end
-  if press('confirm',Keyboard.KEY_ENTER,ButtonAction.ACTION_MENUCONFIRM) then panel:execute() end
+  edit_query()
+  if press('confirm',Keyboard.KEY_ENTER,ButtonAction.ACTION_MENUCONFIRM) then click(panel:confirm_id()) end
   if not panel.open then return end
-  view:draw(panel)
-  if edge('mouse',Input.IsMouseBtnPressed(0)) then local pos=Input.GetMousePosition(false);click(view:hit(pos.X,pos.Y)) end
+  local pos=Isaac.WorldToScreen(Input.GetMousePosition(true))
+  view:draw(panel,pos)
+  if edge('mouse',Input.IsMouseBtnPressed(0)) then click(view:hit(pos.X,pos.Y)) end
 end
 mod:AddCallback(ModCallbacks.MC_POST_RENDER,function()
   local ok,err=pcall(render)

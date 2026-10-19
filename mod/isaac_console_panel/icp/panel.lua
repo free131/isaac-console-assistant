@@ -1,7 +1,54 @@
 local M={}
 M.categories={{'all','全部'},{'collectibles','道具'},{'trinkets','饰品'},{'cards','卡牌 / 符文'},{'pills','胶囊'},{'resources','资源'},{'abilities','能力'},{'stages','楼层'},{'flow','房间 / 重开'},{'favorites','收藏'},{'history','历史'}}
+M.keyboard={}
+for ch in ('abcdefghijklmnopqrstuvwxyz0123456789-'):gmatch('.') do M.keyboard[#M.keyboard+1]={value=ch,label=ch} end
+M.keyboard[38]={value=' ',label='空格'};M.keyboard[39]={value='backspace',label='退格'};M.keyboard[40]={value='done',label='完成'}
 function M.new(search,catalog,state,actions,save,record)
-  local p={open=false,query='',category='all',selected=1,hits={},amount=1,operation='give',tick=0,message='',guard=false}
+  local p={open=false,query='',category='all',selected=1,hits={},amount=1,operation='give',tick=0,message='',guard=false,focus='results',control=1}
+  function p:controls()
+    local ids={'quantity','operation','favorite','execute'}
+    if self.category=='history' then ids[#ids+1]='delete';ids[#ids+1]='clear-history' end
+    ids[#ids+1]='clear';ids[#ids+1]='search';ids[#ids+1]='hotkey';ids[#ids+1]='close'
+    return ids
+  end
+  function p:control_id() local ids=self:controls();self.control=math.max(1,math.min(self.control,#ids));return ids[self.control] end
+  function p:focus_move(delta)
+    local order={'categories','results','details'};local n=2
+    for i,v in ipairs(order) do if self.focus==v then n=i end end
+    self.focus=order[(n-1+delta)%3+1]
+    if self.focus=='details' then self.control=1 end
+  end
+  function p:navigate(dx,dy)
+    if dy~=0 then
+      if self.focus=='categories' then self:category_move(dy)
+      elseif self.focus=='results' then self:select(self.selected+dy)
+      else self.control=(self.control-1+dy)%#self:controls()+1 end
+    end
+    if dx~=0 then
+      if self.focus=='details' and self:control_id()=='quantity' then self:adjust(dx)
+      elseif dx>0 then if self.focus=='categories' then self.focus='results' elseif self.focus=='results' then self.focus='details';self.control=1 end
+      else if self.focus=='details' then self.focus='results' elseif self.focus=='results' then self.focus='categories' end end
+    end
+  end
+  function p:confirm_id()
+    if self.focus=='categories' then self.focus='results';return nil end
+    if self.focus=='results' then return 'execute' end
+    return self:control_id()
+  end
+  function p:open_search()
+    self.editing=true;self.keyboardIndex=1
+    if self.category=='history' then self.category='all';self:refresh(self.greed) end
+  end
+  function p:keyboard_move(dx,dy)
+    local i=self.keyboardIndex or 1;local col=(i-1)%10;local row=math.floor((i-1)/10)
+    self.keyboardIndex=((row+dy)%4)*10+((col+dx)%10)+1
+  end
+  function p:keyboard_confirm()
+    local value=M.keyboard[self.keyboardIndex or 1].value
+    if value=='done' then self.editing=false;self.focus='results'
+    elseif value=='backspace' then self:set_query(self.query:sub(1,-2))
+    else self:set_query(self.query..value) end
+  end
   function p:entry() return self.hits[self.selected] and self.hits[self.selected].entry end
   function p:changed() self.confirm=nil end
   function p:select(index)
@@ -31,7 +78,7 @@ function M.new(search,catalog,state,actions,save,record)
     self:changed()
   end
   function p:request() local e=self:entry();return e and {key=e.key,amount=self.amount,operation=self.operation} end
-  function p:close() self.open=false;self.guard=true;self:changed() end
+  function p:close() self.open=false;self.editing=false;self.guard=true;self:changed() end
   function p:execute()
     local req=self:request();if not req then self.message='没有可执行的结果。';return end
     local e,err=actions:validate(req);if not e then self.message=err;return end
@@ -47,7 +94,14 @@ function M.new(search,catalog,state,actions,save,record)
     local hit=self.hits[self.selected]
     if self.category=='history' and hit then for i,row in ipairs(state.history) do if row==hit.recorded then table.remove(state.history,i);break end end;save();self:refresh(self.greed) end
   end
-  function p:back() if self.confirm then self:changed();self.message='已取消确认。' else self:close() end end
+  function p:back()
+    if self.editing then self.editing=false;self.focus='results';self.message='输入完成，已返回搜索结果。'
+    elseif self.confirm or self.clearConfirm then self:changed();self.clearConfirm=nil;self.message='已取消确认。'
+    elseif self.focus=='details' then self.focus='results';self.message='已返回结果列表。'
+    elseif self.query~='' then self:set_query('');self.message='已清空搜索，返回当前分类。'
+    elseif self.category~='all' then self.category='all';self:refresh(self.greed);self.focus='results';self.message='已返回全部列表。'
+    else self.focus='results';self.message='已在主列表；按打开热键关闭面板。' end
+  end
   function p:page() return math.floor((self.selected-1)/8) end
   function p:visible() local rows={};for i=self:page()*8+1,math.min(#self.hits,self:page()*8+8) do rows[#rows+1]={index=i,hit=self.hits[i]} end;return rows end
   return p

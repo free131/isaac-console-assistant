@@ -35,6 +35,8 @@ def attach_json(lua):
     lua.globals().json_bridge=lua.table_from({'encode':lambda t:json.dumps(to_python(t),ensure_ascii=False),'decode':lambda s:to_lua(json.loads(s))})
 runtime_source=(ROOT/'tests/mod_runtime.lua').read_text('utf-8')
 runtime_lua=runtime();attach_json(runtime_lua);runtime_groups=runtime_lua.execute(runtime_source)
+navigation_lua=runtime();attach_json(navigation_lua);navigation_lua.execute(runtime_source)
+navigation_groups=navigation_lua.execute((ROOT/'tests/mod_navigation.lua').read_text('utf-8'))
 runtime_lua.execute('keys[292]=true;callbacks[1]();keys[292]=false;callbacks[1]()')
 runtime_lua.execute('keys[341]=true;keys[75]=true;callbacks[1]();keys[341]=false;keys[75]=false;callbacks[1]()')
 for c in 'FEIXING': runtime_lua.execute('keys[...]=true;callbacks[1]();keys[...]=false;callbacks[1]()',ord(c),ord(c))
@@ -64,6 +66,7 @@ ET.parse(MOD/'metadata.xml');ET.parse(MOD/'resources/gfx/icp/rect.anm2')
 report={'lua':'5.3','syntax_files':syntax,'module_test_groups':suite,'runtime_test_groups':runtime_groups,'font_glyphs':len(ids),'offline_passed':True,'game_verified':False,'note':'All game APIs mocked; no game process or console commands used.'}
 report['real_json_restart_and_corruption_recovery']=True
 report['enum_snapshot_exact_match']=True
+report['navigation_regression_groups']=navigation_groups
 (ROOT/'test-artifacts').mkdir(exist_ok=True)
 (ROOT/'test-artifacts/mod-offline.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),'utf-8')
 print(json.dumps(report,ensure_ascii=False))
