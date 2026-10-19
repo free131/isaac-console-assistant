@@ -1,0 +1,8 @@
+<metadata>
+  <name>指令面板 · 原版控制台暂停探针</name>
+  <directory>isaac_console_pause_probe</directory>
+  <id>isaac_console_pause_probe</id>
+  <description>只测试原版控制台暂停与 Lua 回调，不执行游戏命令。进单人对局按 F6，说明见 Mod 文件夹 README.md。</description>
+  <version>0.1.0</version>
+  <visibility>Private</visibility>
+</metadata>
