@@ -8,15 +8,7 @@ key(256);assert(nativePauseState==4)
 physical(2);assert(nativePauseState==4) -- Up is now navigation, never close
 pad(14);assert(has('手柄输入：方向选择字符，A 输入，B 完成'))
 -- Search is reachable and usable entirely with controller directions and A/B.
-local cursor=1
-for ch in ('jinbi2'):gmatch('.') do
-  local dest=assert(('abcdefghijklmnopqrstuvwxyz0123456789-'):find(ch,1,true))
-  local col,row=(cursor-1)%10,math.floor((cursor-1)/10)
-  local tocol,torow=(dest-1)%10,math.floor((dest-1)/10)
-  while col~=tocol do pad(col<tocol and 21 or 20);col=col+(col<tocol and 1 or -1) end
-  while row~=torow do pad(row<torow and 23 or 22);row=row+(row<torow and 1 or -1) end
-  pad(14);cursor=dest
-end
+type_virtual('jinbi2',pad)
 pad(15);assert(has('resource:coins') and has('数量：2') and nativePauseState==4)
 pad(15);assert(nativePauseState==4) -- clear query, not close on the same press
 buttons[15]=true;render();assert(#draws==0 and nativePauseState==4)

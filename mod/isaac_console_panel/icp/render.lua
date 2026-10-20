@@ -68,7 +68,7 @@ function M.new(categories,state,keyboard)
       self:box(154,88,592,297,{.07,.10,.14})
       self:text('手柄输入：方向选择字符，A 输入，B 完成',174,101,.78,nil,550)
       self:text(p.query..'_',174,137,.82,nil,550)
-      for i,key in ipairs(keyboard) do self:button('vk:'..i,key.label,174+((i-1)%10)*55,172+math.floor((i-1)/10)*42,50,32) end
+      for i,key in ipairs(keyboard) do self:button('vk:'..i,key.label,174+key.x,172+key.y,key.w,key.h) end
       self:text('支持拼音、首字母、数字；无需鼠标。',174,350,.72,nil,550)
     end
     if self.mouse then

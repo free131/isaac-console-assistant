@@ -1,8 +1,20 @@
 local M={}
 M.categories={{'all','全部'},{'collectibles','道具'},{'trinkets','饰品'},{'cards','卡牌 / 符文'},{'pills','胶囊'},{'resources','资源'},{'abilities','能力'},{'stages','楼层'},{'flow','房间 / 重开'},{'favorites','收藏'},{'history','历史'}}
 M.keyboard={}
-for ch in ('abcdefghijklmnopqrstuvwxyz0123456789-'):gmatch('.') do M.keyboard[#M.keyboard+1]={value=ch,label=ch} end
-M.keyboard[38]={value=' ',label='空格'};M.keyboard[39]={value='backspace',label='退格'};M.keyboard[40]={value='done',label='完成'}
+M.keyboardRows={}
+for row,letters in ipairs({'1234567890-','qwertyuiop','asdfghjkl','zxcvbnm'}) do
+  M.keyboardRows[row]={}
+  for col=1,#letters do
+    local ch=letters:sub(col,col)
+    M.keyboard[#M.keyboard+1]={value=ch,label=ch:upper(),row=row,col=col,x=8+(11-#letters)*49/2+(col-1)*49,y=(row-1)*33,w=44,h=28}
+    M.keyboardRows[row][col]=#M.keyboard
+  end
+end
+M.keyboardRows[5]={}
+for col,key in ipairs({{' ','空格',8,240},{'backspace','退格',258,130},{'done','完成',398,144}}) do
+  M.keyboard[#M.keyboard+1]={value=key[1],label=key[2],row=5,col=col,x=key[3],y=132,w=key[4],h=28}
+  M.keyboardRows[5][col]=#M.keyboard
+end
 function M.new(search,catalog,state,actions,save,record)
   local p={open=false,query='',category='all',selected=1,hits={},amount=1,operation='give',tick=0,message='',guard=false,focus='results',control=1}
   function p:controls()
@@ -50,12 +62,27 @@ function M.new(search,catalog,state,actions,save,record)
     return self:control_id()
   end
   function p:open_search()
-    self.editing=true;self.keyboardIndex=1
+    self.editing=true;self.keyboardIndex=1;self.keyboardAimX=nil
     if self.category=='history' then self.category='all';self:refresh(self.greed) end
   end
   function p:keyboard_move(dx,dy)
-    local i=self.keyboardIndex or 1;local col=(i-1)%10;local row=math.floor((i-1)/10)
-    self.keyboardIndex=((row+dy)%4)*10+((col+dx)%10)+1
+    local key=M.keyboard[self.keyboardIndex or 1]
+    if dx~=0 then
+      local row=M.keyboardRows[key.row]
+      self.keyboardIndex=row[(key.col-1+dx)%#row+1]
+      self.keyboardAimX=nil
+      key=M.keyboard[self.keyboardIndex]
+    end
+    if dy~=0 then
+      local aim=self.keyboardAimX or (key.x+key.w/2)
+      local row=M.keyboardRows[(key.row-1+dy)%#M.keyboardRows+1]
+      local best,distance=row[1],math.huge
+      for _,index in ipairs(row) do
+        local target=M.keyboard[index];local d=math.abs(target.x+target.w/2-aim)
+        if d<distance then best=index;distance=d end
+      end
+      self.keyboardIndex=best;self.keyboardAimX=aim
+    end
   end
   function p:keyboard_confirm()
     local value=M.keyboard[self.keyboardIndex or 1].value

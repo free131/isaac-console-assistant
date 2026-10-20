@@ -32,15 +32,7 @@ pad(14);assert(blocked());pad(23);pad(14);assert(text_has('再次确认“清历
 pad(14);pad(14);assert(text_has('结果 0 条'))
 pad(23);pad(14) -- clear search
 pad(23);pad(14) -- open controller character keyboard
-local cursor=1
-for ch in ('jinbi2'):gmatch('.') do
-  local dest=assert(('abcdefghijklmnopqrstuvwxyz0123456789-'):find(ch,1,true))
-  local col,row=(cursor-1)%10,math.floor((cursor-1)/10)
-  local tocol,torow=(dest-1)%10,math.floor((dest-1)/10)
-  while col~=tocol do pad(col<tocol and 21 or 20);col=col+(col<tocol and 1 or -1) end
-  while row~=torow do pad(row<torow and 23 or 22);row=row+(row<torow and 1 or -1) end
-  pad(14);cursor=dest
-end
+type_virtual('jinbi2',pad)
 pad(15);assert(text_has('resource:coins') and text_has('数量：2') and blocked())
 pad(21);for _=1,6 do pad(23) end;pad(14);assert(text_has('打开 / 关闭热键已设为 F9'))
 pad(23);pad(14);assert(not blocked()) -- close via keyboard/controller selectable control
