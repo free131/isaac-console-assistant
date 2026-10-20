@@ -116,6 +116,7 @@ local function render()
   if pause.owned and not pause:valid() and panel.open then panel:close() end
   local p=player();local index=p and p.ControllerIndex or 0
   local externalMenu=menus_open()
+  if panel.open or panel.guard or externalMenu or not running then chord:cancel_game() end
   local comboToggle=chord:update(running and not externalMenu,index)
   local toggle=edge('toggle',key(Keyboard[state.hotkey])) or comboToggle
   if externalMenu or not running then
@@ -177,13 +178,17 @@ if ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER then
   mod:AddCallback(ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER,function() return pause:hide_native() end)
 end
 mod:AddCallback(ModCallbacks.MC_INPUT_ACTION,function(_,entity,hook,button)
-  local comboHeld=false
-  if not reading and running and not menus_open() then
-    local p=player();local _,both=chord:sample(p and p.ControllerIndex or 0)
-    comboHeld=both~=nil or chord.active
-  end
-  if not reading and (panel.open or panel.guard or comboHeld) and (not entity or entity:ToPlayer()) then
+  if reading or (entity and not entity:ToPlayer()) then return end
+  local p=player();local index=p and p.ControllerIndex or 0
+  local enabled=running and not menus_open()
+  local _,both=chord:sample(index)
+  local comboHeld=enabled and (both~=nil or chord.active)
+  if panel.open or panel.guard or comboHeld then
+    chord:cancel_game()
     if hook==InputHook.GET_ACTION_VALUE then return 0 else return false end
+  end
+  if button==ButtonAction.ACTION_BOMB or button==ButtonAction.ACTION_ITEM or button==ButtonAction.ACTION_PILLCARD then
+    return chord:filter_game(button,hook,index,game:GetFrameCount(),enabled and action(button,index),enabled)
   end
 end)
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,function(_,p,flag) actions:on_cache(p,flag) end)
