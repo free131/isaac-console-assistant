@@ -40,7 +40,7 @@ key(298);assert(blocked()) -- configured F9 reopens
 -- Return hotkey to F8 through keyboard-only focus actions for remaining test fixtures.
 key(290) -- focus results -> details, quantity selected
 for _=1,6 do key(264) end;key(257);key(257) -- hotkey F11 -> F8
-key(256);key(256);assert(blocked())
+key(256);key(263);key(264);key(262);assert(blocked())
 -- Mouse auxiliary path: non-identity world/render/screen spaces, multiple scales.
 local function mouse_click(x,y)
   local w,h=screenW or 960,screenH or 540

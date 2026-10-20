@@ -18,7 +18,7 @@ buttons[15]=false;render();assert(nativePauseState==0)
 physical(2);assert(nativePauseState==4)
 physical(2);pad(23);physical(2);pad(14)
 assert(has('手柄输入：方向选择字符，A 输入，B 完成'))
-physical(5);physical(5);physical(5);assert(nativePauseState==0)
+physical(5);physical(5);assert(nativePauseState==0)
 key(297);assert(nativePauseState==4);key(297);assert(nativePauseState==0)
 -- Unit navigation: every column and an empty result list can reach visible search.
 local Panel=include('icp/panel');local Search=include('icp/search');local State=include('icp/state')
@@ -40,4 +40,6 @@ p:back(true);assert(p.open and p.query=='')
 p.category='resources';p:back(true);assert(p.open and p.category=='all')
 p:back();assert(p.open) -- keyboard Esc root behavior is retained
 p:back(true);assert(not p.open and p.guard)
+p.open=true;p.guard=false;p.category='favorites';p.query='';p.focus='results'
+p:back();assert(not p.open and p.category=='favorites')
 return 4

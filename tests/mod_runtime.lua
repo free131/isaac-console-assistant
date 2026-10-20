@@ -20,16 +20,17 @@ include('main')
 local function render() frame=frame+1;callbacks[1]();assert(#logs==0,logs[#logs]) end
 local function keypress(k) keys[k]=true;render();keys[k]=false;render() end
 local function typequery(s) for i=1,#s do keypress(string.byte(s:sub(i,i):upper())) end end
+local function leave_favorites() keypress(263);keypress(264);keypress(262) end
 local function blocked() return callbacks[2](nil,runtime_player,0,0)==false end
 callbacks[5](nil,false);render();assert(not blocked())
 keypress(297);assert(blocked());assert(callbacks[2](nil,runtime_player,2,4)==0)
-keypress(256) -- leave default favorites for the general gameplay fixture
+leave_favorites() -- switch from favorites to all without the back action
 typequery('jinbi2');keypress(257);assert(runtime_player.coins==2 and saved~='')
 -- Holding confirm never repeats execution; release after closing must still be guarded.
 keys[257]=true;render();render();local n=runtime_player.coins;render();assert(runtime_player.coins==n)
 keys[297]=true;render();assert(blocked());keys[297]=false;render();assert(blocked());keys[257]=false;render();assert(not blocked())
 -- Controller menu actions are observable by the panel despite its own input hook.
-keypress(297);keypress(256);typequery('jinbi2');buttons[14]=true;render();assert(runtime_player.coins==n+2);buttons[14]=false;render()
+keypress(297);leave_favorites();typequery('jinbi2');buttons[14]=true;render();assert(runtime_player.coins==n+2);buttons[14]=false;render()
 buttons[15]=true;render();assert(blocked());buttons[15]=false;render();assert(blocked());keypress(297);assert(not blocked())
 -- Native pause and MCM prevent stacking, and close an already opened panel.
 paused=true;keypress(297);assert(not blocked());paused=false
@@ -40,5 +41,5 @@ gt={mapHeld=true};keypress(297);assert(not blocked());gt.mapHeld=false
 for a=0,28 do assert(callbacks[2](nil,runtime_player,0,a)==nil) end
 keypress(297)
 for _,size in ipairs({{640,360},{960,540},{1280,720},{1920,1080}}) do screenW=size[1];screenH=size[2];draws={};render();for _,d in ipairs(draws) do assert(d.x>=0 and d.y>=0 and d.x<screenW and d.y<screenH) end end
-keypress(256);typequery('jinbi2')
+leave_favorites();typequery('jinbi2')
 return 7

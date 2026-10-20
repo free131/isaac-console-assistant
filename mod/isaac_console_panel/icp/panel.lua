@@ -141,6 +141,7 @@ function M.new(search,catalog,state,actions,save,record)
     elseif self.focus=='search' then self.focus=self.searchFrom or 'results';self.message='已返回结果列表。'
     elseif self.focus=='details' then self.focus='results';self.message='已返回结果列表。'
     elseif self.query~='' then self:set_query('');self.message='已清空搜索，返回当前分类。'
+    elseif self.category=='favorites' then self:close()
     elseif self.category~='all' then self.category='all';self:refresh(self.greed);self.focus='results';self.message='已返回全部列表。'
     elseif closeRoot then self:close()
     else self.focus='results';self.message='已在主列表；按打开热键关闭面板。' end

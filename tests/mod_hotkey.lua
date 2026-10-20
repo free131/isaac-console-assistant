@@ -9,7 +9,7 @@ pads={};render(1)
 -- The next Up press navigates to search; only B can return to the root and close.
 pads[1]={[2]=true};render(2);assert(nativePauseState==4 and blocked())
 pads={};render(3);assert(nativePauseState==4)
-for i=1,3 do buttons[15]=true;render(3);buttons[15]=false;render(3) end
+for i=1,2 do buttons[15]=true;render(3);buttons[15]=false;render(3) end
 assert(nativePauseState==0 and not blocked())
 -- Keyboard Up and analog/menu Up are navigation, not global panel hotkeys.
 key(265,4);buttons[22]=true;render(5);buttons[22]=false;render(6)
