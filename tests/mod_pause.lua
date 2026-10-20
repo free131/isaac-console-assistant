@@ -7,8 +7,9 @@ key(262);key(256);assert(nativePauseState==4 and blocked()) -- returning is not 
 keys[257]=true;render();keys[297]=true;render();keys[297]=false;render()
 assert(nativePauseState==4 and callbacks[9]()==false and blocked()) -- held Enter guards resume
 keys[257]=false;render();assert(nativePauseState==0 and callbacks[9]()==nil and not blocked())
--- Missing extension refuses to open, instead of claiming a fake safe pause.
-local native=PauseMenu;PauseMenu=nil;key(297);assert(not blocked() and nativePauseState==0);PauseMenu=native
+-- Missing extension opens ordinary mode without claiming a native pause.
+local native=PauseMenu;PauseMenu=nil;key(297);assert(blocked() and nativePauseState==0)
+key(297);assert(not blocked());PauseMenu=native
 key(297);assert(nativePauseState==4 and blocked())
 -- Never release a pause acquired by a different menu.
 nativePauseState=2;render();render();assert(nativePauseState==2 and callbacks[9]()==nil)

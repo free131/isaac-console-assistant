@@ -24,7 +24,7 @@ local function sync_hud(visiblePanel)
   end
 end
 local pause=NativePause.new({
-  available=function() return PauseMenu and type(PauseMenu.GetState)=='function' and type(PauseMenu.SetState)=='function' and type(PauseMenu.GetSprite)=='function' and ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER~=nil end,
+  available=function() return PauseMenu and type(PauseMenu.GetState)=='function' and type(PauseMenu.SetState)=='function' and type(PauseMenu.GetSprite)=='function' and ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER~=nil and ModCallbacks.MC_POST_HUD_RENDER~=nil end,
   get=function() return PauseMenu.GetState() end,set=function(value) PauseMenu.SetState(value) end,
   -- J835: state 1 still runs native PauseScreen::ProcessInput (raw Esc/Enter).
   -- Private state 4 stays paused but bypasses native states 0/1/2 and popup 3.
@@ -152,8 +152,10 @@ local function render()
   end
   if toggle then
     if panel.open then panel:close() elseif not panel.guard then
-      local ok,message=pause:begin()
-      if ok then panel.open=true;panel.guard=true;panel.focus='results';panel.control=1;panel.category='favorites';panel.query='';panel:refresh(game:IsGreedMode())
+      local enhanced=pause:available()
+      local ok,message=true,nil
+      if enhanced then ok,message=pause:begin() end
+      if ok then panel.nativePaused=pause.owned;panel.open=true;panel.guard=true;panel.focus='results';panel.control=1;panel.category='favorites';panel.query='';panel:refresh(game:IsGreedMode())
       else panel.message=message;panel.noticeUntil=panel.tick+240 end
     end
   end
@@ -199,16 +201,7 @@ local function panel_error(err)
   paintPending=nil;reading=false;panel:close();pause:finish();sync_hud(false)
   Isaac.DebugString('ICP panel error: '..tostring(err))
 end
--- Input is processed once in POST_RENDER. REPENTOGON's EID adapter draws in
--- MC_HUD_RENDER, a later phase; a priority within POST_RENDER cannot cover it.
-mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER,10000,function()
-  paintPending=nil
-  local ok,err=pcall(render)
-  if not ok then panel_error(err) end
-  sync_hud(panel.open)
-end)
-if ModCallbacks.MC_POST_HUD_RENDER then
-mod:AddPriorityCallback(ModCallbacks.MC_POST_HUD_RENDER,10000,function()
+local function paint()
   local pos=paintPending;paintPending=nil
   if not pos or not panel.open then return end
   local ok,err=pcall(function()
@@ -217,7 +210,19 @@ mod:AddPriorityCallback(ModCallbacks.MC_POST_HUD_RENDER,10000,function()
   end)
   if not ok then panel_error(err) end
   sync_hud(panel.open)
+end
+-- Input is processed once in POST_RENDER. REPENTOGON's EID adapter draws in
+-- MC_HUD_RENDER, a later phase; a priority within POST_RENDER cannot cover it.
+mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER,10000,function()
+  paintPending=nil
+  local ok,err=pcall(render)
+  if not ok then panel_error(err) end
+  sync_hud(panel.open)
+  -- Vanilla Repentance has no POST_HUD_RENDER: use the ordinary late callback.
+  if not ModCallbacks.MC_POST_HUD_RENDER then paint() end
 end)
+if ModCallbacks.MC_POST_HUD_RENDER then
+  mod:AddPriorityCallback(ModCallbacks.MC_POST_HUD_RENDER,10000,paint)
 end
 if ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER then
   mod:AddCallback(ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER,function() return pause:hide_native() end)
