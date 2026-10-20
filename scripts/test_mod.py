@@ -46,6 +46,8 @@ pause_lua=runtime();attach_json(pause_lua);pause_lua.execute(runtime_source)
 pause_groups=pause_lua.execute((ROOT/'tests/mod_pause.lua').read_text('utf-8'))
 pause_input_lua=runtime();attach_json(pause_input_lua);pause_input_lua.execute(runtime_source)
 pause_input_groups=pause_input_lua.execute((ROOT/'tests/mod_pause_input.lua').read_text('utf-8'))
+hotkey_lua=runtime();attach_json(hotkey_lua);hotkey_lua.execute(runtime_source)
+hotkey_groups=hotkey_lua.execute((ROOT/'tests/mod_hotkey.lua').read_text('utf-8'))
 runtime_lua.execute('keys[292]=true;callbacks[1]();keys[292]=false;callbacks[1]()')
 runtime_lua.execute('keys[341]=true;keys[75]=true;callbacks[1]();keys[341]=false;keys[75]=false;callbacks[1]()')
 for c in 'FEIXING': runtime_lua.execute('keys[...]=true;callbacks[1]();keys[...]=false;callbacks[1]()',ord(c),ord(c))
@@ -80,6 +82,7 @@ report['keyboard_compatibility_groups']=keyboard_groups
 report['continuous_back_render_groups']=back_groups
 report['native_pause_groups']=pause_groups
 report['native_pause_input_groups']=pause_input_groups
+report['controller_hotkey_groups']=hotkey_groups
 (ROOT/'test-artifacts').mkdir(exist_ok=True)
 (ROOT/'test-artifacts/mod-offline.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),'utf-8')
 print(json.dumps(report,ensure_ascii=False))
