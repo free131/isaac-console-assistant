@@ -131,7 +131,7 @@ local function render()
   local p=player();local index=p and p.ControllerIndex or 0
   local externalMenu=menus_open()
   local padToggle=padHotkey:update(running and not externalMenu,index)
-  local toggle=edge('toggle',key(Keyboard[state.hotkey])) or padToggle
+  local toggle=edge('toggle',key(Keyboard[state.hotkey])) or (padToggle and not panel.open)
   if externalMenu or not running then
     if panel.open then panel:close() end
     if panel.guard and release_ready(index) then panel.guard=false;held={};pause:finish() end
@@ -149,8 +149,9 @@ local function render()
   -- Index 0 includes the keyboard's menu mappings (space, Q, E, arrows).
   -- Physical keyboard keys are read above; only poll menu actions for a gamepad.
   local function press(name,k,a,rep) return edge(name,key(k) or (a and pad_action(a,index)),rep) end
-  if press('back',Keyboard.KEY_ESCAPE,ButtonAction.ACTION_MENUBACK) then
-    panel:back()
+  local padBack=pad_action(ButtonAction.ACTION_MENUBACK,index)
+  if edge('back',key(Keyboard.KEY_ESCAPE) or padBack) then
+    panel:back(padBack)
     if panel.open then view:draw(panel,Isaac.WorldToScreen(Input.GetMousePosition(true))) end
     return
   end

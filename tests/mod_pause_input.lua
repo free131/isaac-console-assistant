@@ -22,7 +22,7 @@ for i=1,30 do render();assert(nativePauseState==4 and blocked() and #draws>0) en
 keys[256]=false;render()
 for i=1,4 do key(256);assert(nativePauseState==4 and blocked()) end
 buttons[15]=true;render();buttons[15]=false;render()
-assert(nativePauseState==4 and blocked())
+assert(nativePauseState==0 and not blocked());key(297);assert(nativePauseState==4)
 -- Close, release, and reopen repeatedly after returning from details or the root.
 for i=1,10 do
   key(297);assert(nativePauseState==0 and not blocked())

@@ -12,17 +12,30 @@ function M.new(search,catalog,state,actions,save,record)
     return ids
   end
   function p:control_id() local ids=self:controls();self.control=math.max(1,math.min(self.control,#ids));return ids[self.control] end
+  function p:focus_search()
+    if self.focus~='search' then self.searchFrom=self.focus end
+    self.focus='search'
+  end
   function p:focus_move(delta)
-    local order={'categories','results','details'};local n=2
+    local order={'search','categories','results','details'};local n=3
     for i,v in ipairs(order) do if self.focus==v then n=i end end
-    self.focus=order[(n-1+delta)%3+1]
+    local nextFocus=order[(n-1+delta)%#order+1]
+    if nextFocus=='search' then self:focus_search() else self.focus=nextFocus end
     if self.focus=='details' then self.control=1 end
   end
   function p:navigate(dx,dy)
     if dy~=0 then
-      if self.focus=='categories' then self:category_move(dy)
-      elseif self.focus=='results' then self:select(self.selected+dy)
-      else self.control=(self.control-1+dy)%#self:controls()+1 end
+      if self.focus=='search' then
+        if dy>0 then self.focus=self.searchFrom or 'results' end
+      elseif self.focus=='categories' then
+        local at=1;for i,c in ipairs(M.categories) do if c[1]==self.category then at=i end end
+        if (dy<0 and at==1) or (dy>0 and at==#M.categories) then self:focus_search() else self:category_move(dy) end
+      elseif self.focus=='results' then
+        if #self.hits==0 or (dy<0 and self.selected<=1) then self:focus_search() else self:select(self.selected+dy) end
+      else
+        if (dy<0 and self.control<=1) or (dy>0 and self.control>=#self:controls()) then self:focus_search()
+        else self.control=self.control+dy end
+      end
     end
     if dx~=0 then
       if self.focus=='details' and self:control_id()=='quantity' then self:adjust(dx)
@@ -31,6 +44,7 @@ function M.new(search,catalog,state,actions,save,record)
     end
   end
   function p:confirm_id()
+    if self.focus=='search' then return 'search' end
     if self.focus=='categories' then self.focus='results';return nil end
     if self.focus=='results' then return 'execute' end
     return self:control_id()
@@ -94,12 +108,14 @@ function M.new(search,catalog,state,actions,save,record)
     local hit=self.hits[self.selected]
     if self.category=='history' and hit then for i,row in ipairs(state.history) do if row==hit.recorded then table.remove(state.history,i);break end end;save();self:refresh(self.greed) end
   end
-  function p:back()
+  function p:back(closeRoot)
     if self.editing then self.editing=false;self.focus='results';self.message='输入完成，已返回搜索结果。'
     elseif self.confirm or self.clearConfirm then self:changed();self.clearConfirm=nil;self.message='已取消确认。'
+    elseif self.focus=='search' then self.focus=self.searchFrom or 'results';self.message='已返回结果列表。'
     elseif self.focus=='details' then self.focus='results';self.message='已返回结果列表。'
     elseif self.query~='' then self:set_query('');self.message='已清空搜索，返回当前分类。'
     elseif self.category~='all' then self.category='all';self:refresh(self.greed);self.focus='results';self.message='已返回全部列表。'
+    elseif closeRoot then self:close()
     else self.focus='results';self.message='已在主列表；按打开热键关闭面板。' end
   end
   function p:page() return math.floor((self.selected-1)/8) end

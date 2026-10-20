@@ -6,10 +6,11 @@ key(297,0);assert(nativePauseState==0)
 pads[1]={[2]=true};render(0);assert(nativePauseState==4 and blocked())
 for i=1,60 do render(0);assert(nativePauseState==4) end
 pads={};render(1)
--- The next press closes once; pause is held until the physical key releases.
+-- The next Up press navigates to search; only B can return to the root and close.
 pads[1]={[2]=true};render(2);assert(nativePauseState==4 and blocked())
-render(2);assert(nativePauseState==4)
-pads={};render(3);assert(nativePauseState==0 and not blocked())
+pads={};render(3);assert(nativePauseState==4)
+for i=1,3 do buttons[15]=true;render(3);buttons[15]=false;render(3) end
+assert(nativePauseState==0 and not blocked())
 -- Keyboard Up and analog/menu Up are navigation, not global panel hotkeys.
 key(265,4);buttons[22]=true;render(5);buttons[22]=false;render(6)
 assert(nativePauseState==0)

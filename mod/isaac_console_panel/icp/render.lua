@@ -32,7 +32,7 @@ function M.new(categories,state,keyboard)
     self.scale=math.min((Isaac.GetScreenWidth()-16)/760,(Isaac.GetScreenHeight()-16)/450,1.5)
     self.x=(Isaac.GetScreenWidth()-760*self.scale)/2;self.y=(Isaac.GetScreenHeight()-450*self.scale)/2;self.buttons={}
     self.mouse=pos and {x=(pos.X-self.x)/self.scale,y=(pos.Y-self.y)/self.scale} or nil
-    self.focus_id=p.focus=='categories' and 'cat:'..p.category or (p.focus=='results' and 'row:'..p.selected or p:control_id())
+    self.focus_id=p.focus=='search' and 'search' or p.focus=='categories' and 'cat:'..p.category or (p.focus=='results' and 'row:'..p.selected or p:control_id())
     self:box(0,0,760,450,{.045,.06,.085,.97})
     self:text('以撒指令面板',15,12,1.1);self:text('v0.1 · Repentance 1.7.9b',430,18,.7)
     self:button('hotkey',state.hotkey:gsub('KEY_','')..' 改键',590,10,105,30)
@@ -61,8 +61,8 @@ function M.new(categories,state,keyboard)
     end
     if p.category=='history' then self:button('delete','删此条',14,370,63,25);self:button('clear-history','清历史',82,370,64,25) end
     self:text(p.message,158,389,.67,{.94,.76,.38,1},585,2)
-    self:text('战斗与计时已暂停；'..(state.controllerEnabled and (({[0]='十字键左',[1]='十字键右',[2]='十字键上',[3]='十字键下'})[state.controllerButton]..'：开关。') or '用键盘热键关闭。'),15,419,.70,{.55,.94,.72,1},415)
-    self:text('F1切区  方向导航  Enter/A确认  Esc/B返回',421,420,.55,nil,325)
+    self:text('战斗与计时已暂停；'..(state.controllerEnabled and (({[0]='十字键左',[1]='十字键右',[2]='十字键上',[3]='十字键下'})[state.controllerButton]..'：打开。') or '用键盘热键关闭。'),15,419,.70,{.55,.94,.72,1},415)
+    self:text('F1切区  方向导航  Enter/A确认  Esc返回 B返回/关闭',421,420,.55,nil,325)
     if p.editing then
       self.buttons={};self.focus_id='vk:'..p.keyboardIndex
       self:box(154,88,592,297,{.07,.10,.14})

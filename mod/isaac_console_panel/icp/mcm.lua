@@ -30,7 +30,7 @@ function M.new(state,save)
     api.AddSetting(category,'按键设置',{
       Type=api.OptionType.BOOLEAN,Default=true,
       CurrentSetting=function() return state.controllerEnabled end,
-      Display=function() return '启用手柄开关：'..(state.controllerEnabled and '开启' or '关闭') end,
+      Display=function() return '启用手柄打开键：'..(state.controllerEnabled and '开启' or '关闭') end,
       OnChange=function(value)
         if type(value)=='boolean' and state.controllerEnabled~=value then state.controllerEnabled=value;save() end
       end,
@@ -39,11 +39,11 @@ function M.new(state,save)
     api.AddSetting(category,'按键设置',{
       Type=api.OptionType.NUMBER,Minimum=1,Maximum=#buttons,Default=1,
       CurrentSetting=function() return find(buttons,state.controllerButton) end,
-      Display=function() return '手柄开关键：'..names[find(buttons,state.controllerButton)] end,
+      Display=function() return '手柄打开键：'..names[find(buttons,state.controllerButton)] end,
       OnChange=function(value)
         if buttons[value]~=nil and state.controllerButton~=buttons[value] then state.controllerButton=buttons[value];save() end
       end,
-      Info={'默认十字键上。选中方向用于开关，不再用于角色移动。','左摇杆仍可导航；LB、RB、LT、RT 不作为开关键。','离开菜单后先松开按键，再按即可立即触发。'}
+      Info={'默认十字键上，按下打开面板；面板打开后用于导航。','左摇杆仍可导航；LB、RB、LT、RT 不作为开关键。','离开菜单后先松开按键，再按立即打开；B 逐层返回至关闭。'}
     })
     registered[api]=true
     return true
