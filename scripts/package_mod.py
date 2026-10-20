@@ -5,7 +5,7 @@ MOD=ROOT/'mod/isaac_console_panel'
 files=sorted(p for p in MOD.rglob('*') if p.is_file())
 assert all(not p.name.startswith('save') and p.suffix!='.dat' for p in files)
 release=ROOT/'release';release.mkdir(exist_ok=True)
-target=release/'以撒游戏内指令面板-0.1.0.zip'
+target=release/'isaac-console-panel-0.1.0.zip'
 with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as z:
     for p in files: z.write(p,'isaac_console_panel/'+p.relative_to(MOD).as_posix())
 manifest={p.relative_to(MOD).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in files}

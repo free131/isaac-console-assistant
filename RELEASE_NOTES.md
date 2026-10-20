@@ -4,7 +4,7 @@
 
 ## 下载与安装
 
-下载附件 `以撒游戏内指令面板-0.1.0.zip`，退出游戏，将其中 `isaac_console_panel` 文件夹放入游戏 `mods` 目录，重启并启用。附件 `SHA256SUMS-mod-0.1.0.txt` 提供包校验值。GitHub 自动提供仓库源码下载。
+下载附件 `isaac-console-panel-0.1.0.zip`，退出游戏，将其中 `isaac_console_panel` 文件夹放入游戏 `mods` 目录，重启并启用。附件 `SHA256SUMS-mod-0.1.0.txt` 提供包校验值。GitHub 自动提供仓库源码下载。
 
 F8 或手柄十字键上打开；方向导航、Enter／A 确认、Esc／B 返回，收藏列表层 B／Esc 直接关闭。默认打开收藏，支持 QWERTY 手柄字符输入。MCM 可配置开关键。
 

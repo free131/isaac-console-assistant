@@ -4,7 +4,7 @@
 
 本仓库同时包含游戏内 Lua 指令面板和 Windows 桌面命令速查工具。当前发布重点是 **游戏内指令面板 v0.1.0 试用版**，适配 **Repentance v1.7.9b.J835**，未适配 Repentance+。
 
-1. 在 [Releases](https://github.com/free131/isaac-console-assistant/releases) 下载 `以撒游戏内指令面板-0.1.0.zip`。
+1. 在 [Releases](https://github.com/free131/isaac-console-assistant/releases) 下载 `isaac-console-panel-0.1.0.zip`。
 2. 退出游戏，把 ZIP 内的 `isaac_console_panel` 文件夹放进游戏的 `mods` 文件夹，不要重复嵌套文件夹。
 3. 重启游戏并启用 Mod，进入单人对局后按 **F8** 或 **手柄十字键上** 打开。手柄 **B** 逐层返回，收藏列表层再按即关闭。
 
