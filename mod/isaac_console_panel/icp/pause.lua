@@ -8,6 +8,9 @@ function M.new(env)
     if not self:available() then return false,'暂停组件未加载，面板暂不打开。' end
     local ok,result=pcall(function()
       if env.get()~=env.closed or env.paused() then return false end
+      -- Native PauseScreen update still runs while rendering is suppressed.
+      -- A finished Dissapear animation would immediately clear status back to 0.
+      if env.prepare then env.prepare() end
       env.set(env.open)
       if env.get()~=env.open or not env.paused() then
         env.set(env.closed);return false

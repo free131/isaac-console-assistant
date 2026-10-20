@@ -1,8 +1,8 @@
 -- Actual main.lua callback harness; all game APIs below are mocks, no game process.
-callbacks={};keys={};buttons={};pads={};mouse=false;paused=false;nativePauseState=0;logs={};pauseLogs={};draws={};saved='';players=1;frame=0
+callbacks={};keys={};buttons={};pads={};mouse=false;paused=false;nativePauseState=0;nativePauseAnimation='Dissapear';logs={};pauseLogs={};draws={};saved='';players=1;frame=0
 function RegisterMod() return {HasData=function() return initialSave~=nil end,LoadData=function() return initialSave end,SaveData=function(_,s) saved=s end,AddCallback=function(_,id,fn) callbacks[id]=fn end} end
 ModCallbacks={MC_POST_RENDER=1,MC_INPUT_ACTION=2,MC_EVALUATE_CACHE=3,MC_ENTITY_TAKE_DMG=4,MC_POST_GAME_STARTED=5,MC_PRE_GAME_EXIT=6,MC_POST_NEW_ROOM=7,MC_PRE_PAUSE_SCREEN_RENDER=9}
-PauseMenu={GetState=function() return nativePauseState end,SetState=function(s) nativePauseState=s end}
+PauseMenu={GetState=function() return nativePauseState end,SetState=function(s) nativePauseState=s end,GetSprite=function() return {Play=function(_,name) nativePauseAnimation=name end,GetAnimation=function() return nativePauseAnimation end} end}
 CacheFlag={CACHE_FLYING=128};EntityType={ENTITY_PLAYER=1};InputHook={IS_ACTION_PRESSED=0,IS_ACTION_TRIGGERED=1,GET_ACTION_VALUE=2}
 ButtonAction={ACTION_BOMB=8,ACTION_ITEM=9,ACTION_PILLCARD=10,ACTION_FULLSCREEN=17,ACTION_MUTE=18,ACTION_MENUCONFIRM=14,ACTION_MENUBACK=15,ACTION_MENULEFT=20,ACTION_MENURIGHT=21,ACTION_MENUUP=22,ACTION_MENUDOWN=23,ACTION_MENULT=24,ACTION_MENURT=25}
 Keyboard={KEY_F1=290,KEY_F8=297,KEY_F9=298,KEY_F11=300,KEY_ESCAPE=256,KEY_UP=265,KEY_DOWN=264,KEY_LEFT=263,KEY_RIGHT=262,KEY_TAB=258,KEY_PAGE_UP=266,KEY_PAGE_DOWN=267,KEY_F2=291,KEY_F3=292,KEY_DELETE=261,KEY_BACKSPACE=259,KEY_LEFT_CONTROL=341,KEY_RIGHT_CONTROL=345,KEY_K=75,KEY_MINUS=45,KEY_SPACE=32,KEY_ENTER=257}
