@@ -73,7 +73,7 @@ local function pad_button(code,index)
   reading=previous
   return ok and down or false
 end
-local chord=Hotkey.new(pad_button,function() return Isaac.GetTime() end)
+local chord=Hotkey.new(pad_button)
 local function release_ready(index)
   for _,code in pairs(Keyboard) do if type(code)=='number' and code>=32 and key(code) then return false end end
   for code=0,26 do if pad_action(code,index) then return false end end
@@ -116,7 +116,6 @@ local function render()
   if pause.owned and not pause:valid() and panel.open then panel:close() end
   local p=player();local index=p and p.ControllerIndex or 0
   local externalMenu=menus_open()
-  if panel.open or panel.guard or externalMenu or not running then chord:cancel_game() end
   local comboToggle=chord:update(running and not externalMenu,index)
   local toggle=edge('toggle',key(Keyboard[state.hotkey])) or comboToggle
   if externalMenu or not running then
@@ -184,12 +183,9 @@ mod:AddCallback(ModCallbacks.MC_INPUT_ACTION,function(_,entity,hook,button)
   local _,both=chord:sample(index)
   local comboHeld=enabled and (both~=nil or chord.active)
   if panel.open or panel.guard or comboHeld then
-    chord:cancel_game()
     if hook==InputHook.GET_ACTION_VALUE then return 0 else return false end
   end
-  if button==ButtonAction.ACTION_BOMB or button==ButtonAction.ACTION_ITEM or button==ButtonAction.ACTION_PILLCARD then
-    return chord:filter_game(button,hook,index,game:GetFrameCount(),enabled and action(button,index),enabled)
-  end
+
 end)
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,function(_,p,flag) actions:on_cache(p,flag) end)
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG,function(_,entity) return actions:on_damage(entity) end,EntityType.ENTITY_PLAYER)

@@ -1,55 +1,35 @@
--- Model native action polling BEFORE MC_POST_RENDER, including staggered shoulders.
-local consumed={[8]=0,[9]=0};local previous={}
-local function raw(action)
-  return pads[1] and pads[1][action==8 and 8 or 11]==true or false
-end
-local function step(ms)
-  clock=ms;frame=frame+1
-  if nativePauseState==0 then
-    for _,action in ipairs({8,9}) do
-      local trigger=callbacks[2](nil,runtime_player,1,action)
-      if trigger==nil then trigger=raw(action) and not previous[action] end
-      if trigger then consumed[action]=consumed[action]+1 end
-      previous[action]=raw(action)
-    end
+-- Ordinary gameplay must use the original engine action values without replay.
+local function render(ms) clock=ms;frame=frame+1;callbacks[1]();assert(#logs==0,logs[#logs]) end
+local function key(k,ms) keys[k]=true;render(ms);keys[k]=false;render(ms+1) end
+key(297,0);assert(nativePauseState==0)
+local original=Input.IsActionPressed
+local actionReads=0
+Input.IsActionPressed=function(...) actionReads=actionReads+1;return original(...) end
+local function untouched()
+  local count=actionReads
+  for _,action in ipairs({8,9,10}) do
+    for hook=0,2 do assert(callbacks[2](nil,runtime_player,hook,action)==nil) end
   end
-  callbacks[1]();assert(#logs==0,logs[#logs])
+  assert(actionReads==count) -- no nested reads that could consume native triggers
 end
-local function close(ms)
-  pads={};step(ms);keys[297]=true;step(ms+1);keys[297]=false;step(ms+2)
-  assert(nativePauseState==0)
+-- A single shoulder stays unmodified on its first frame, held, and released.
+for _,code in ipairs({8,11}) do
+  pads[1]={[code]=true};untouched();render(10);untouched();render(1000);untouched()
+  pads={};render(1001);untouched()
 end
-close(0)
--- Both pressed in the same input update: nothing consumes before the instant open.
-pads[1]={[8]=true,[11]=true};step(10)
-assert(nativePauseState==4 and consumed[8]==0 and consumed[9]==0)
-close(20)
--- Either shoulder may arrive one frame earlier; queued actions must be cancelled.
-for _,first in ipairs({8,11}) do
-  pads[1]={[first]=true};step(100);assert(nativePauseState==0)
-  pads[1][first==8 and 11 or 8]=true;step(117)
-  assert(nativePauseState==4 and consumed[8]==0 and consumed[9]==0)
-  close(130)
+-- Ordinary keyboard/gamepad controls all fall through, regardless of elapsed time.
+for action=0,28 do
+  for hook=0,2 do assert(callbacks[2](nil,runtime_player,hook,action)==nil) end
 end
--- A quick single LB tap is replayed once even if released within the grace window.
-pads[1]={[8]=true};step(200);pads={};step(210)
-assert(consumed[8]==0);step(289);assert(consumed[8]==0)
-step(290);assert(consumed[8]==1);step(307);step(400);assert(consumed[8]==1)
--- A held single RB still activates once, and release does not replay it again.
-pads[1]={[11]=true};step(500);step(590);assert(consumed[9]==1)
-step(607);pads={};step(620);step(800);assert(consumed[9]==1)
--- Opening by F8 during the buffer cancels a pending bomb rather than firing later.
-pads[1]={[8]=true};step(900);keys[297]=true;step(910);keys[297]=false
-assert(nativePauseState==4);close(920);step(1100);assert(consumed[8]==1)
--- All three hook types see a consistent delayed pulse in one game frame.
-local Hotkey=include('icp/hotkey');local time=0;local down=true
-local h=Hotkey.new(function(code) return code==8 and down end,function() return time end)
-assert(h:filter_game(8,0,1,1,true,true)==false)
-assert(h:filter_game(8,1,1,1,true,true)==false)
-assert(h:filter_game(8,2,1,1,true,true)==0)
-down=false;time=90
-assert(h:filter_game(8,0,1,2,false,true)==true)
-assert(h:filter_game(8,1,1,2,false,true)==true)
-assert(h:filter_game(8,2,1,2,false,true)==1)
-assert(h:filter_game(8,1,1,3,false,true)==nil)
-return 5
+-- Only an actual complete chord suppresses game actions and opens the panel.
+pads[1]={[8]=true,[11]=true}
+assert(callbacks[2](nil,runtime_player,1,8)==false)
+render(2000);assert(nativePauseState==4)
+pads={};render(2001)
+key(297,2100);assert(nativePauseState==0);untouched()
+-- Two different controllers never cause single actions to be intercepted.
+runtime_player.ControllerIndex=0
+pads={[1]={[8]=true},[2]={[11]=true}};untouched();render(2200);untouched()
+pads={};render(2201)
+Input.IsActionPressed=original
+return 4
