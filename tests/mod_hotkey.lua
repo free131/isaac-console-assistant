@@ -1,43 +1,40 @@
 local function render(ms) clock=ms;frame=frame+1;callbacks[1]();assert(#logs==0,logs[#logs]) end
 local function key(k,ms) keys[k]=true;render(ms);keys[k]=false;render(ms+1) end
 local function blocked() return callbacks[2](nil,runtime_player,0,0)==false end
--- Runtime bootstrap leaves the panel open; close with the unchanged keyboard hotkey.
 key(297,0);assert(nativePauseState==0)
-pads[1]={[8]=true};render(10)
-assert(nativePauseState==0) -- a single bumper cannot open
-pads[1][11]=true;render(20);assert(nativePauseState==4 and blocked())
-render(5000);assert(nativePauseState==4) -- holding never repeats
-pads[1][8]=false;render(5001);assert(nativePauseState==4 and blocked())
-pads[1][11]=false;render(5002);assert(nativePauseState==4)
--- The same immediate chord closes; pause remains until both bumpers release.
-pads[1]={[8]=true,[11]=true};render(6000)
-assert(nativePauseState==4 and blocked())
-pads[1][8]=false;render(6001);assert(nativePauseState==4)
-pads[1][11]=false;render(6002);assert(nativePauseState==0 and not blocked())
--- A single sampled frame with both buttons is sufficient; no clock advance.
-pads[1]={[8]=true,[11]=true};render(7000);assert(nativePauseState==4)
-pads={};render(7000);key(297,7100);assert(nativePauseState==0)
--- No stacking with MCM or GoodTrip, including carrying a held chord out of a menu.
+-- Physical D-pad Up opens on the first render without a clock advance.
+pads[1]={[2]=true};render(0);assert(nativePauseState==4 and blocked())
+for i=1,60 do render(0);assert(nativePauseState==4) end
+pads={};render(1)
+-- The next press closes once; pause is held until the physical key releases.
+pads[1]={[2]=true};render(2);assert(nativePauseState==4 and blocked())
+render(2);assert(nativePauseState==4)
+pads={};render(3);assert(nativePauseState==0 and not blocked())
+-- Keyboard Up and analog/menu Up are navigation, not global panel hotkeys.
+key(265,4);buttons[22]=true;render(5);buttons[22]=false;render(6)
+assert(nativePauseState==0)
+-- Both old bumpers remain normal gameplay actions; neither opens the panel.
+pads[1]={[8]=true,[11]=true};render(7);render(1000)
+assert(nativePauseState==0 and not blocked());pads={};render(1001)
+-- Do not open over another menu or from a carried key held on leaving it.
 for i,menu in ipairs({'mcm','goodtrip','native'}) do
   if menu=='mcm' then ModConfigMenu={IsVisible=true}
   elseif menu=='goodtrip' then gt={mapHeld=true} else nativePauseState=2 end
-  pads[1]={[8]=true,[11]=true};render(10000+i*2000);render(11000+i*2000)
-  ModConfigMenu=nil;gt=nil;nativePauseState=0;render(11100+i*2000)
+  pads[1]={[2]=true};render(2000+i*10)
+  ModConfigMenu=nil;gt=nil;nativePauseState=0;render(2001+i*10)
   assert(nativePauseState==0)
-  pads={};render(11200+i*2000)
+  pads={};render(2002+i*10)
 end
--- Keyboard player can use a controller, but two separate pads cannot form a chord.
-runtime_player.ControllerIndex=0
-pads={[1]={[8]=true},[2]={[11]=true}};render(20000);render(21000)
+-- A keyboard player can use another pad, but a controller player owns its hotkey.
+runtime_player.ControllerIndex=1;pads[2]={[2]=true};render(3000)
+assert(nativePauseState==0);pads={};render(3001)
+runtime_player.ControllerIndex=0;pads[2]={[2]=true};render(3002)
+assert(nativePauseState==4);pads={};render(3003);key(297,3004)
 assert(nativePauseState==0)
-pads={};render(21001);pads={[2]={[8]=true,[11]=true}}
-render(22000);render(22600);assert(nativePauseState==4)
-pads={};render(22601);key(297,23000);assert(nativePauseState==0)
--- Chord recognition has no timing requirement, even at a frozen clock.
-local Hotkey=include('icp/hotkey');local down={}
-local h=Hotkey.new(function(code,index) return down[index] and down[index][code] or false end,function() return 0 end)
-down[1]={[8]=true,[11]=true};assert(h:update(true,1))
-assert(not h:update(true,1));down[1][8]=false;assert(not h:update(true,1))
-down[1]={};assert(not h:update(true,1));down[1]={[8]=true,[11]=true}
-assert(h:update(true,1))
+-- Repeated physical taps work; keyboard F8 is retained.
+for i=1,3 do
+  pads[1]={[2]=true};render(4000+i*10);pads={};render(4001+i*10)
+  assert(nativePauseState==4)
+  key(297,4002+i*10);assert(nativePauseState==0)
+end
 return 5

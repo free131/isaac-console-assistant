@@ -73,7 +73,7 @@ local function pad_button(code,index)
   reading=previous
   return ok and down or false
 end
-local chord=Hotkey.new(pad_button)
+local padHotkey=Hotkey.new(pad_button)
 local function release_ready(index)
   for _,code in pairs(Keyboard) do if type(code)=='number' and code>=32 and key(code) then return false end end
   for code=0,26 do if pad_action(code,index) then return false end end
@@ -116,8 +116,8 @@ local function render()
   if pause.owned and not pause:valid() and panel.open then panel:close() end
   local p=player();local index=p and p.ControllerIndex or 0
   local externalMenu=menus_open()
-  local comboToggle=chord:update(running and not externalMenu,index)
-  local toggle=edge('toggle',key(Keyboard[state.hotkey])) or comboToggle
+  local padToggle=padHotkey:update(running and not externalMenu,index)
+  local toggle=edge('toggle',key(Keyboard[state.hotkey])) or padToggle
   if externalMenu or not running then
     if panel.open then panel:close() end
     if panel.guard and release_ready(index) then panel.guard=false;held={};pause:finish() end
@@ -155,8 +155,8 @@ local function render()
   if press('down',Keyboard.KEY_DOWN,ButtonAction.ACTION_MENUDOWN,true) then panel:navigate(0,1) end
   if press('left',Keyboard.KEY_LEFT,ButtonAction.ACTION_MENULEFT,true) then panel:navigate(-1,0) end
   if press('right',Keyboard.KEY_RIGHT,ButtonAction.ACTION_MENURIGHT,true) then panel:navigate(1,0) end
-  if press('focus',Keyboard.KEY_F1,not chord.active and ButtonAction.ACTION_MENURT) then panel:focus_move(1) end
-  if press('focus-back',nil,not chord.active and ButtonAction.ACTION_MENULT) then panel:focus_move(-1) end
+  if press('focus',Keyboard.KEY_F1,ButtonAction.ACTION_MENURT) then panel:focus_move(1) end
+  if press('focus-back',nil,ButtonAction.ACTION_MENULT) then panel:focus_move(-1) end
   if press('category',Keyboard.KEY_PAGE_DOWN,nil) then panel:category_move(1) end
   if press('category-back',Keyboard.KEY_PAGE_UP,nil) then panel:category_move(-1) end
   if press('mode',Keyboard.KEY_F2,nil) then panel:toggle_operation() end
@@ -180,9 +180,8 @@ mod:AddCallback(ModCallbacks.MC_INPUT_ACTION,function(_,entity,hook,button)
   if reading or (entity and not entity:ToPlayer()) then return end
   local p=player();local index=p and p.ControllerIndex or 0
   local enabled=running and not menus_open()
-  local _,both=chord:sample(index)
-  local comboHeld=enabled and (both~=nil or chord.active)
-  if panel.open or panel.guard or comboHeld then
+  local hotkeyHeld=enabled and (padHotkey:sample(index) or padHotkey.active)
+  if panel.open or panel.guard or hotkeyHeld then
     if hook==InputHook.GET_ACTION_VALUE then return 0 else return false end
   end
 

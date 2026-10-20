@@ -21,9 +21,12 @@ end
 for action=0,28 do
   for hook=0,2 do assert(callbacks[2](nil,runtime_player,hook,action)==nil) end
 end
--- Only an actual complete chord suppresses game actions and opens the panel.
-pads[1]={[8]=true,[11]=true}
-assert(callbacks[2](nil,runtime_player,1,8)==false)
+-- LB+RB is no longer a hotkey and must not intercept either original action.
+pads[1]={[8]=true,[11]=true};untouched();render(1900)
+assert(nativePauseState==0);untouched();pads={};render(1901)
+-- D-pad Up alone now suppresses movement before render and immediately opens.
+pads[1]={[2]=true}
+assert(callbacks[2](nil,runtime_player,1,2)==false)
 render(2000);assert(nativePauseState==4)
 pads={};render(2001)
 key(297,2100);assert(nativePauseState==0);untouched()
