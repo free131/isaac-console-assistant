@@ -135,6 +135,8 @@ local function edit_query()
     if edge('text-space',key(Keyboard.KEY_SPACE),true) then panel:set_query(panel.query..' ') end
   end
 end
+local paintPending
+local function queue_draw(pos) paintPending=pos end
 local function render()
   register_mcm()
   panel.tick=panel.tick+1
@@ -163,7 +165,7 @@ local function render()
   local padBack=pad_action(ButtonAction.ACTION_MENUBACK,index)
   if edge('back',key(Keyboard.KEY_ESCAPE) or padBack) then
     panel:back(padBack)
-    if panel.open then view:draw(panel,Isaac.WorldToScreen(Input.GetMousePosition(true))) end
+    if panel.open then queue_draw(Isaac.WorldToScreen(Input.GetMousePosition(true))) end
     return
   end
   if panel.editing then
@@ -173,8 +175,7 @@ local function render()
     if press('right',Keyboard.KEY_RIGHT,ButtonAction.ACTION_MENURIGHT,true) then panel:keyboard_move(1,0) end
     edit_query()
     if press('confirm',Keyboard.KEY_ENTER,ButtonAction.ACTION_MENUCONFIRM) then panel:keyboard_confirm() end
-    local pos=Isaac.WorldToScreen(Input.GetMousePosition(true));view:draw(panel,pos)
-    if edge('mouse',Input.IsMouseBtnPressed(0)) then click(view:hit(pos.X,pos.Y)) end
+    queue_draw(Isaac.WorldToScreen(Input.GetMousePosition(true)))
     return
   end
   if press('up',Keyboard.KEY_UP,ButtonAction.ACTION_MENUUP,true) then panel:navigate(0,-1) end
@@ -192,16 +193,32 @@ local function render()
   if press('confirm',Keyboard.KEY_ENTER,ButtonAction.ACTION_MENUCONFIRM) then click(panel:confirm_id()) end
   if not panel.open then return end
   local pos=Isaac.WorldToScreen(Input.GetMousePosition(true))
-  view:draw(panel,pos)
-  if edge('mouse',Input.IsMouseBtnPressed(0)) then click(view:hit(pos.X,pos.Y)) end
+  queue_draw(pos)
 end
--- Draw after ordinary Mod overlays (including EID); native HUD visibility is
--- owned only while our panel is open and restored to its previous value.
+local function panel_error(err)
+  paintPending=nil;reading=false;panel:close();pause:finish();sync_hud(false)
+  Isaac.DebugString('ICP panel error: '..tostring(err))
+end
+-- Input is processed once in POST_RENDER. REPENTOGON's EID adapter draws in
+-- MC_HUD_RENDER, a later phase; a priority within POST_RENDER cannot cover it.
 mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER,10000,function()
+  paintPending=nil
   local ok,err=pcall(render)
-  if not ok then reading=false;panel:close();pause:finish();Isaac.DebugString('ICP panel error: '..tostring(err)) end
+  if not ok then panel_error(err) end
   sync_hud(panel.open)
 end)
+if ModCallbacks.MC_POST_HUD_RENDER then
+mod:AddPriorityCallback(ModCallbacks.MC_POST_HUD_RENDER,10000,function()
+  local pos=paintPending;paintPending=nil
+  if not pos or not panel.open then return end
+  local ok,err=pcall(function()
+    view:draw(panel,pos)
+    if edge('mouse',Input.IsMouseBtnPressed(0)) then click(view:hit(pos.X,pos.Y)) end
+  end)
+  if not ok then panel_error(err) end
+  sync_hud(panel.open)
+end)
+end
 if ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER then
   mod:AddCallback(ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER,function() return pause:hide_native() end)
 end
