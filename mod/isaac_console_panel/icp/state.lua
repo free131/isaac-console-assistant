@@ -1,7 +1,7 @@
 local M = {}
 local valid_hotkeys = {KEY_F8=true, KEY_F9=true, KEY_F11=true}
 function M.defaults()
-  return {version=1, favorites={}, history={}, hotkey='KEY_F8', run={seed='', flight=false, invincible=false}}
+  return {version=1, favorites={}, history={}, hotkey='KEY_F8', controllerEnabled=true, controllerButton=2, run={seed='', flight=false, invincible=false}}
 end
 function M.load(raw, decode, known)
   local result = M.defaults()
@@ -20,6 +20,8 @@ function M.load(raw, decode, known)
     end
   end
   if valid_hotkeys[parsed.hotkey] then result.hotkey=parsed.hotkey end
+  if type(parsed.controllerEnabled)=='boolean' then result.controllerEnabled=parsed.controllerEnabled end
+  if type(parsed.controllerButton)=='number' and parsed.controllerButton%1==0 and parsed.controllerButton>=0 and parsed.controllerButton<=3 then result.controllerButton=parsed.controllerButton end
   if type(parsed.run)=='table' then result.run={seed=tostring(parsed.run.seed or ''),flight=parsed.run.flight==true,invincible=parsed.run.invincible==true} end
   if type(parsed.recovery)=='string' then result.recovery=parsed.recovery end
   return result

@@ -6,6 +6,7 @@ local Panel=include('icp/panel')
 local Renderer=include('icp/render')
 local NativePause=include('icp/pause')
 local Hotkey=include('icp/hotkey')
+local MCM=include('icp/mcm')
 local json=require('json')
 local catalog=Search.prepare(include('icp/catalog'))
 local raw=mod:HasData() and mod:LoadData() or ''
@@ -30,6 +31,13 @@ local function save()
   if not ok then Isaac.DebugString('ICP save failed: '..tostring(err)) end
   return ok
 end
+local mcm=MCM.new(state,save)
+local mcmErrorReported=false
+local function register_mcm()
+  local ok,err=pcall(function() mcm:register(ModConfigMenu) end)
+  if not ok and not mcmErrorReported then mcmErrorReported=true;Isaac.DebugString('ICP MCM registration failed: '..tostring(err)) end
+end
+register_mcm()
 local actions=Actions.new({player=player,game=function() return game end,execute=Isaac.ExecuteCommand,flying_flag=CacheFlag.CACHE_FLYING},state,catalog)
 local panel
 panel=Panel.new(Search,catalog,state,actions,function() if not save() then panel.message='操作已执行，但记录保存失败。' end end,function(req) State.record(state,req,game:GetFrameCount()) end)
@@ -73,7 +81,7 @@ local function pad_button(code,index)
   reading=previous
   return ok and down or false
 end
-local padHotkey=Hotkey.new(pad_button)
+local padHotkey=Hotkey.new(pad_button,function() return state.controllerEnabled and state.controllerButton or -1 end)
 local function release_ready(index)
   for _,code in pairs(Keyboard) do if type(code)=='number' and code>=32 and key(code) then return false end end
   for code=0,26 do if pad_action(code,index) then return false end end
@@ -112,6 +120,7 @@ local function edit_query()
   end
 end
 local function render()
+  register_mcm()
   panel.tick=panel.tick+1
   if pause.owned and not pause:valid() and panel.open then panel:close() end
   local p=player();local index=p and p.ControllerIndex or 0

@@ -61,7 +61,7 @@ function M.new(categories,state,keyboard)
     end
     if p.category=='history' then self:button('delete','删此条',14,370,63,25);self:button('clear-history','清历史',82,370,64,25) end
     self:text(p.message,158,389,.67,{.94,.76,.38,1},585,2)
-    self:text('战斗与计时已暂停；十字键上：开关。',15,419,.70,{.55,.94,.72,1},415)
+    self:text('战斗与计时已暂停；'..(state.controllerEnabled and (({[0]='十字键左',[1]='十字键右',[2]='十字键上',[3]='十字键下'})[state.controllerButton]..'：开关。') or '用键盘热键关闭。'),15,419,.70,{.55,.94,.72,1},415)
     self:text('F1切区  方向导航  Enter/A确认  Esc/B返回',421,420,.55,nil,325)
     if p.editing then
       self.buttons={};self.focus_id='vk:'..p.keyboardIndex

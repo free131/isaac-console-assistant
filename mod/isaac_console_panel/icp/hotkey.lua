@@ -1,10 +1,12 @@
 -- Raw controller D-pad Up=2; analog stick and keyboard arrows are not hotkeys.
 local M={}
-function M.new(down)
+function M.new(down,getButton)
   local h={latched=false,active=false}
   function h:sample(index)
-    if index>0 then return down(2,index) end
-    for pad=1,4 do if down(2,pad) then return true end end
+    local button=getButton and getButton() or 2
+    if button<0 then return false end
+    if index>0 then return down(button,index) end
+    for pad=1,4 do if down(button,pad) then return true end end
     return false
   end
   function h:update(enabled,index)
