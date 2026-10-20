@@ -1,5 +1,21 @@
 # 以撒控制台助手
 
+## 游戏内 Mod 下载与安装
+
+本仓库同时包含游戏内 Lua 指令面板和 Windows 桌面命令速查工具。当前发布重点是 **游戏内指令面板 v0.1.0 试用版**，适配 **Repentance v1.7.9b.J835**，未适配 Repentance+。
+
+1. 在 [Releases](https://github.com/free131/isaac-console-assistant/releases) 下载 `以撒游戏内指令面板-0.1.0.zip`。
+2. 退出游戏，把 ZIP 内的 `isaac_console_panel` 文件夹放进游戏的 `mods` 文件夹，不要重复嵌套文件夹。
+3. 重启游戏并启用 Mod，进入单人对局后按 **F8** 或 **手柄十字键上** 打开。手柄 **B** 逐层返回，收藏列表层再按即关闭。
+
+支持中文目录、拼音／首字母／ID 搜索、QWERTY 手柄字符输入、数量调整、收藏、最近 100 条历史，以及可选 MCM 配置。收录 721 个道具、188 个饰品、97 张卡牌／符文和 50 个胶囊效果，另有资源、能力、楼层和回溯／重开操作。
+
+**直接安装即可使用普通模式，无需额外扩展。普通模式不会暂停战斗，面板接管角色操作，角色仍可能受伤。** 可选安装 [REPENTOGON 1.0.12e](https://github.com/TeamREPENTOGON/REPENTOGON/releases/tag/1.0.12e) 后，自动启用完整暂停与 HUD 后置绘制。MCM 也为可选依赖。
+
+这是试用版：部分功能已有用户实测反馈，最新普通模式及绘制改动目前通过离线测试，完整游戏验收仍在进行。请查阅 [Mod 使用说明](mod/isaac_console_panel/README.md)、[游戏内测试清单](mod/isaac_console_panel/游戏内测试清单.md) 和 [源码构建说明](BUILDING.md)。字体和数据许可见 [第三方声明](THIRD-PARTY-NOTICES.md) 与 [Mod 来源与许可](mod/isaac_console_panel/来源与许可.md)。发布包不包含游戏、REPENTOGON、存档或其他 Mod。
+
+## Windows 桌面工具
+
 现新增独立的[游戏内指令面板 v0.1 试用版](mod/isaac_console_panel/README.md)，源码在 `mod/isaac_console_panel/`，构建入口 `npm run mod:package`。桌面版保持原有功能。同一个 Mod ZIP 可直接安装到 mods：普通模式不暂停战斗；可选安装匹配 J835 的 REPENTOGON 1.0.12e 后自动启用完整暂停与 HUD 后置绘制。两种模式离线验证已通过，实机验收请按[测试清单](mod/isaac_console_panel/游戏内测试清单.md)逐项确认；详见[暂停与回退](引擎暂停与回退.md)。
 
 适配 **The Binding of Isaac: Repentance v1.7.9b.J835** 的 Windows 离线命令速查工具。v1.1.0 默认开启中文模糊搜索，也支持英文、拼音、别名与 ID；填写参数后复制命令，并提供收藏、最近复制和窗口置顶。

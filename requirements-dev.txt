@@ -1,0 +1,4 @@
+# Offline Mod tests and optional font generation; not needed by game players.
+lupa==2.8
+Pillow==12.0.0
+fonttools==4.51.0
