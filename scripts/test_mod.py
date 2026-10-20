@@ -59,6 +59,8 @@ search_back_lua=runtime();attach_json(search_back_lua);search_back_lua.execute(r
 search_back_groups=search_back_lua.execute((ROOT/'tests/mod_search_back.lua').read_text('utf-8'))
 qwerty_lua=runtime();attach_json(qwerty_lua);qwerty_lua.execute(runtime_source)
 qwerty_groups=qwerty_lua.execute((ROOT/'tests/mod_qwerty.lua').read_text('utf-8'))
+overlay_lua=runtime();attach_json(overlay_lua);overlay_lua.execute(runtime_source)
+overlay_groups=overlay_lua.execute((ROOT/'tests/mod_overlay.lua').read_text('utf-8'))
 runtime_lua.execute('keys[292]=true;callbacks[1]();keys[292]=false;callbacks[1]()')
 runtime_lua.execute('keys[341]=true;keys[75]=true;callbacks[1]();keys[341]=false;keys[75]=false;callbacks[1]()')
 for c in 'FEIXING': runtime_lua.execute('keys[...]=true;callbacks[1]();keys[...]=false;callbacks[1]()',ord(c),ord(c))
@@ -99,6 +101,7 @@ report['mcm_groups']=mcm_groups
 report['native_pause_animation_groups']=animation_groups
 report['search_back_groups']=search_back_groups
 report['qwerty_groups']=qwerty_groups
+report['overlay_groups']=overlay_groups
 (ROOT/'test-artifacts').mkdir(exist_ok=True)
 (ROOT/'test-artifacts/mod-offline.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),'utf-8')
 print(json.dumps(report,ensure_ascii=False))

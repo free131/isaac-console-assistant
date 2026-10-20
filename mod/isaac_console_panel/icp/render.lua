@@ -33,7 +33,7 @@ function M.new(categories,state,keyboard)
     self.x=(Isaac.GetScreenWidth()-760*self.scale)/2;self.y=(Isaac.GetScreenHeight()-450*self.scale)/2;self.buttons={}
     self.mouse=pos and {x=(pos.X-self.x)/self.scale,y=(pos.Y-self.y)/self.scale} or nil
     self.focus_id=p.focus=='search' and 'search' or p.focus=='categories' and 'cat:'..p.category or (p.focus=='results' and 'row:'..p.selected or p:control_id())
-    self:box(0,0,760,450,{.045,.06,.085,.97})
+    self:box(0,0,760,450,{.045,.06,.085,1})
     self:text('以撒指令面板',15,12,1.1);self:text('v0.1 · Repentance 1.7.9b',430,18,.7)
     self:button('hotkey',state.hotkey:gsub('KEY_','')..' 改键',590,10,105,30)
     self:button('close','关闭',702,10,43,30)

@@ -12,6 +12,17 @@ local catalog=Search.prepare(include('icp/catalog'))
 local raw=mod:HasData() and mod:LoadData() or ''
 local state,warning=State.load(raw,json.decode,catalog.by_key)
 local game=Game()
+local hudBeforePanel
+local function sync_hud(visiblePanel)
+  local hud=game:GetHUD()
+  if visiblePanel then
+    if hudBeforePanel==nil then hudBeforePanel=hud:IsVisible() end
+    hud:SetVisible(false)
+  elseif hudBeforePanel~=nil then
+    hud:SetVisible(hudBeforePanel)
+    hudBeforePanel=nil
+  end
+end
 local pause=NativePause.new({
   available=function() return PauseMenu and type(PauseMenu.GetState)=='function' and type(PauseMenu.SetState)=='function' and type(PauseMenu.GetSprite)=='function' and ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER~=nil end,
   get=function() return PauseMenu.GetState() end,set=function(value) PauseMenu.SetState(value) end,
@@ -184,9 +195,12 @@ local function render()
   view:draw(panel,pos)
   if edge('mouse',Input.IsMouseBtnPressed(0)) then click(view:hit(pos.X,pos.Y)) end
 end
-mod:AddCallback(ModCallbacks.MC_POST_RENDER,function()
+-- Draw after ordinary Mod overlays (including EID); native HUD visibility is
+-- owned only while our panel is open and restored to its previous value.
+mod:AddPriorityCallback(ModCallbacks.MC_POST_RENDER,10000,function()
   local ok,err=pcall(render)
   if not ok then reading=false;panel:close();pause:finish();Isaac.DebugString('ICP panel error: '..tostring(err)) end
+  sync_hud(panel.open)
 end)
 if ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER then
   mod:AddCallback(ModCallbacks.MC_PRE_PAUSE_SCREEN_RENDER,function() return pause:hide_native() end)
@@ -204,7 +218,7 @@ end)
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE,function(_,p,flag) actions:on_cache(p,flag) end)
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG,function(_,entity) return actions:on_damage(entity) end,EntityType.ENTITY_PLAYER)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED,function(_,continued)
-  pause:finish();running=true;State.begin_run(state,continued,game:GetSeeds():GetStartSeed());actions:refresh_flight();panel:close();save()
+  sync_hud(false);pause:finish();running=true;State.begin_run(state,continued,game:GetSeeds():GetStartSeed());actions:refresh_flight();panel:close();save()
 end)
-mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT,function() panel:close();pause:finish();save();running=false end)
-mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,function() if panel.open then panel:close() end;pause:finish() end)
+mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT,function() panel:close();sync_hud(false);pause:finish();save();running=false end)
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM,function() if panel.open then panel:close() end;sync_hud(false);pause:finish() end)
