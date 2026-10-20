@@ -25,7 +25,7 @@ pad(20);for _=1,6 do pad(23) end;pad(21);pad(21);pad(23);pad(14);assert(text_has
 pad(14);assert(text_has('操作：开启'));pad(23);pad(23);pad(14);assert(text_has('本 Mod 状态：开启'))
 pad(15);pad(15)
 -- History management is reachable without mouse: select history through categories.
-pad(20);for _=1,10 do pad(23) end;pad(21);pad(21)
+pad(20);for _=1,9 do pad(23) end;pad(21);pad(21)
 for _=1,4 do pad(23) end -- details control 5: delete
 pad(14);assert(blocked());pad(23);pad(14);assert(text_has('再次确认“清历史”以清空记录。'));pad(15);assert(blocked())
 -- Cancel clear confirmation, then activate twice to clear all history.
@@ -49,7 +49,7 @@ local function mouse_click(x,y)
 end
 for _,size in ipairs({{640,360},{960,540},{1280,720},{1920,1080}}) do
   screenW=size[1];screenH=size[2];render()
-  mouse_click(60,225);assert(text_has('resource:coins'))
+  mouse_click(60,250);assert(text_has('resource:coins'))
   mouse_click(250,157);assert(text_has('resource:bombs'))
   mouse_click(718,274);assert(text_has('数量：2'))
   key(256);assert(blocked())

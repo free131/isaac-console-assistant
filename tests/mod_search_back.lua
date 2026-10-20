@@ -26,7 +26,7 @@ local catalog=Search.prepare(include('icp/catalog'))
 local p=Panel.new(Search,catalog,State.defaults(),{},function() end,function() end)
 p.open=true;p:refresh(false)
 for _,focus in ipairs({'results','categories','details'}) do
-  p.focus=focus;p.control=1;p.category='all';p:refresh(false)
+  p.focus=focus;p.control=1;p.category=focus=='categories' and 'favorites' or 'all';p:refresh(false)
   p:navigate(0,-1);assert(p.focus=='search' and p:confirm_id()=='search')
   p:navigate(0,1);assert(p.focus==focus)
 end

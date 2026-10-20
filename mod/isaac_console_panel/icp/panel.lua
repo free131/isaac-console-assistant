@@ -1,5 +1,5 @@
 local M={}
-M.categories={{'all','全部'},{'collectibles','道具'},{'trinkets','饰品'},{'cards','卡牌 / 符文'},{'pills','胶囊'},{'resources','资源'},{'abilities','能力'},{'stages','楼层'},{'flow','房间 / 重开'},{'favorites','收藏'},{'history','历史'}}
+M.categories={{'favorites','收藏'},{'all','全部'},{'collectibles','道具'},{'trinkets','饰品'},{'cards','卡牌 / 符文'},{'pills','胶囊'},{'resources','资源'},{'abilities','能力'},{'stages','楼层'},{'flow','房间 / 重开'},{'history','历史'}}
 M.keyboard={}
 M.keyboardRows={}
 for row,letters in ipairs({'1234567890-','qwertyuiop','asdfghjkl','zxcvbnm'}) do
