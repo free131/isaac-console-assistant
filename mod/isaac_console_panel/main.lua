@@ -140,7 +140,7 @@ local function render()
   if toggle then
     if panel.open then panel:close() elseif not panel.guard then
       local ok,message=pause:begin()
-      if ok then panel.open=true;panel.guard=true;panel.focus='results';panel.control=1;panel:refresh(game:IsGreedMode())
+      if ok then panel.open=true;panel.guard=true;panel.focus='results';panel.control=1;panel.category='favorites';panel.query='';panel:refresh(game:IsGreedMode())
       else panel.message=message;panel.noticeUntil=panel.tick+240 end
     end
   end

@@ -25,7 +25,7 @@ nativePauseAnimation='Dissapear';pads[1]={[2]=true};render()
 assert(nativePauseState==4 and nativePauseAnimation=='Idle')
 pads={};render();render();assert(nativePauseState==4)
 pads[1]={[2]=true};render();pads={};render();assert(nativePauseState==4)
-for i=1,2 do buttons[15]=true;render();buttons[15]=false;render() end
+for i=1,3 do buttons[15]=true;render();buttons[15]=false;render() end
 assert(nativePauseState==0)
 assert(clears==0)
 -- A failing sprite initialization must not acquire or hide a native pause.

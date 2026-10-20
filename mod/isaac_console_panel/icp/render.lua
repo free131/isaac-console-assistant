@@ -45,7 +45,7 @@ function M.new(categories,state,keyboard)
     for n,row in ipairs(rows) do
       local e=row.hit.entry;self:button('row:'..row.index,(state.favorites[e.key] and '★ ' or '')..e.name,158,116+(n-1)*29,279,27,row.index==p.selected)
     end
-    if #rows==0 then self:text('没有结果。试试更短的拼音或 ID。',169,136,.75,nil,250,3) end
+    if #rows==0 then self:text(p.category=='favorites' and '还没有收藏。切换分类后可添加。' or '没有结果。试试更短的拼音或 ID。',169,136,.75,nil,250,3) end
     self:button('prev','上一页',158,355,85,27);self:text((p:page()+1)..' / '..math.max(1,math.ceil(#p.hits/8)),263,361,.7);self:button('next','下一页',352,355,85,27)
     local e=p:entry()
     if e then
